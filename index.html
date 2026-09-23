@@ -55,7 +55,7 @@
   .sync-status.error{color:#fecaca;}
 
   /* ---- tabs ---- */
-  .tabs{display:flex;gap:6px;margin-bottom:22px;background:var(--card);border:1px solid var(--line);border-radius:100px;padding:5px;width:fit-content;box-shadow:0 1px 2px rgba(15,32,68,.04);}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;background:var(--card);border:1px solid var(--line);border-radius:100px;padding:5px;width:fit-content;max-width:100%;box-shadow:0 1px 2px rgba(15,32,68,.04);}
   .tab-btn{padding:9px 18px;border-radius:100px;border:none;background:transparent;font-family:inherit;font-weight:700;font-size:13px;color:var(--text-soft);cursor:pointer;}
   .tab-btn.active{background:var(--navy);color:#fff;}
   .tab-panel{display:none;}
@@ -67,43 +67,51 @@
   .card .subtitle{font-size:12.5px;color:var(--text-soft);margin:0 0 16px;}
   .eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin:0 0 6px;}
 
-  /* ---- settings grid ---- */
+  /* ---- fields ---- */
   .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
   .field label{display:block;font-size:11.5px;font-weight:700;color:var(--text-soft);margin-bottom:5px;}
   .field input, .field select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:#fbfcfe;color:var(--text);}
   .field input:focus, .field select:focus{outline:2px solid var(--blue);outline-offset:-1px;background:#fff;}
+  .field input[readonly]{background:var(--bg);color:var(--text-soft);}
   .field .hint{font-size:10.5px;color:var(--text-faint);margin-top:4px;}
 
   /* ---- tier header ---- */
   .tier-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:16px;}
   .tier-title{display:flex;align-items:center;gap:10px;}
-  .tier-pill{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;}
+  .tier-pill{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;background:linear-gradient(135deg,#60a5fa,#2563eb);}
   .pill-platinum{background:linear-gradient(135deg,#8b96a8,#5b6472);}
   .pill-gold{background:linear-gradient(135deg,#e8b34a,#c8922a);}
   .pill-silver{background:linear-gradient(135deg,#b9c2cc,#8b96a4);}
+  .pill-bronze{background:linear-gradient(135deg,#c98a5a,#9a5f34);}
   .tier-title h2{margin:0;}
   .tier-stats{display:flex;gap:18px;flex-wrap:wrap;}
   .stat{text-align:right;}
   .stat .num{font-size:17px;font-weight:800;color:var(--navy);display:block;line-height:1.2;}
   .stat .lbl{font-size:10.5px;color:var(--text-faint);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+  .over{color:var(--red) !important;}
 
-  .qty-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-  .qty-inline .field{width:120px;}
-  .qty-note{font-size:11.5px;color:var(--text-faint);}
+  .qty-inline{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .qty-inline .field{width:130px;}
+  .qty-note{font-size:11.5px;color:var(--text-faint);padding-bottom:10px;}
 
   /* ---- table ---- */
   .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-sm);}
   table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px;}
   thead th{background:var(--blue-bg);color:var(--navy);font-weight:800;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;padding:10px 8px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);}
-  tbody td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  thead th.num-cell{text-align:right;}
+  tbody td, tfoot td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle;}
   tbody tr:last-child td{border-bottom:none;}
   tbody tr:hover{background:#fafbfd;}
-  table input{width:100%;min-width:70px;padding:6px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:12.5px;background:#fbfcfe;}
-  table input:focus{outline:2px solid var(--blue);outline-offset:-1px;background:#fff;}
-  .col-name input{min-width:130px;}
+  tfoot td{border-top:2px solid var(--line);border-bottom:none;font-weight:800;color:var(--navy);background:#fbfcfe;}
+  table input, table select{width:100%;min-width:70px;padding:6px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:12.5px;background:#fbfcfe;color:var(--text);}
+  table input:focus, table select:focus{outline:2px solid var(--blue);outline-offset:-1px;background:#fff;}
+  .col-name input{min-width:150px;}
+  .col-tier input{min-width:54px;width:64px;}
+  .num-input{text-align:right;font-variant-numeric:tabular-nums;}
   .num-cell{text-align:right;font-variant-numeric:tabular-nums;}
   .landed-cell{font-weight:700;color:var(--navy);white-space:nowrap;}
   .line-total-cell{font-weight:800;color:var(--blue);white-space:nowrap;}
+  .empty-row td{text-align:center;color:var(--text-faint);padding:18px;}
   .row-remove{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:15px;padding:4px 6px;border-radius:6px;}
   .row-remove:hover{color:var(--red);background:#fef2f2;}
 
@@ -111,16 +119,28 @@
   .add-row-btn:hover{background:#dbeafe;}
 
   .tier-footer{display:flex;justify-content:flex-end;gap:26px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);flex-wrap:wrap;}
-  .tier-footer .stat{text-align:right;}
+
+  /* ---- areas ---- */
+  .area-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .area-pill{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:100px;border:1px solid var(--line);background:var(--card);font-family:inherit;font-weight:700;font-size:12.5px;color:var(--text-soft);cursor:pointer;}
+  .area-pill:hover{border-color:var(--blue);}
+  .area-pill.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .area-pill .count{font-size:11px;font-weight:700;opacity:.65;}
+  .matrix td, .matrix th{text-align:right;white-space:nowrap;}
+  .matrix td:first-child, .matrix th:first-child, .matrix td:nth-child(2), .matrix th:nth-child(2){text-align:left;}
+  .matrix tbody tr{cursor:pointer;}
+  .matrix tbody tr.active{background:var(--blue-bg);}
+  .matrix tfoot tr + tr td{border-top:1px solid var(--line);font-weight:700;color:var(--text-soft);}
+  .matrix td{padding:9px 8px;}
 
   /* ---- summary ---- */
-  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px;}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px;}
   .summary-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 1px 3px rgba(15,32,68,.04);}
   .summary-card .eyebrow{margin-bottom:8px;}
   .summary-card .big{font-size:26px;font-weight:800;color:var(--navy);line-height:1.15;}
   .summary-card .sub{font-size:11.5px;color:var(--text-soft);margin-top:4px;}
   .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .bar-label{width:82px;font-size:12px;font-weight:700;color:var(--text-soft);flex-shrink:0;}
+  .bar-label{width:110px;font-size:12px;font-weight:700;color:var(--text-soft);flex-shrink:0;}
   .bar-track{flex:1;height:10px;background:var(--bg);border-radius:100px;overflow:hidden;}
   .bar-fill{height:100%;border-radius:100px;}
   .bar-value{width:120px;text-align:right;font-size:12px;font-weight:700;color:var(--navy);flex-shrink:0;}
@@ -128,7 +148,7 @@
   /* ---- appreciation ---- */
   .appreciation-controls{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;}
   .appreciation-controls .field{width:180px;}
-  .status-toggle{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:100px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid transparent;}
+  .status-toggle{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:100px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;border:1px solid transparent;white-space:nowrap;}
   .status-sent{background:var(--green-bg);color:var(--green);border-color:rgba(22,163,74,.25);}
   .status-pending{background:var(--amber-bg);color:var(--amber);border-color:rgba(217,119,6,.25);}
   .status-toggle svg{width:12px;height:12px;}
@@ -137,8 +157,10 @@
   footer p{font-size:11px;color:var(--text-faint);margin:0;}
 
   @media (max-width:640px){
-    .hero-inner{flex-direction:column;align-items:flex-start;}
+    .wrap{padding:0 16px 60px;}
+    .hero-inner{flex-direction:column;align-items:flex-start;padding:0 16px;}
     .tier-stats{width:100%;justify-content:space-between;}
+    .tabs{border-radius:18px;}
   }
 </style>
 </head>
@@ -155,15 +177,15 @@
     </div>
     <div class="hero-actions">
       <div class="sync-status" id="syncStatus"><span class="dot"></span><span id="syncStatusText">Loading…</span></div>
-      <button class="ghost-btn" onclick="exportJSON()">
+      <button class="ghost-btn" data-action="export" title="Download a copy of all tracker data as a .json file">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
-        Export data
+        Download backup
       </button>
-      <button class="ghost-btn" onclick="document.getElementById('importFile').click()">
+      <button class="ghost-btn" data-action="import" title="Replace ALL tracker data with a previously downloaded backup file">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V8m0 0 4 4m-4-4-4 4M5 3h14"/></svg>
-        Import data
+        Restore backup
       </button>
-      <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(event)">
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none">
     </div>
   </div>
 </header>
@@ -171,28 +193,38 @@
 <div class="wrap">
 
   <div class="tabs">
-    <button class="tab-btn active" data-tab="tiers" onclick="switchTab('tiers')">Tiers &amp; Costing</button>
-    <button class="tab-btn" data-tab="appreciation" onclick="switchTab('appreciation')">Customer Appreciation</button>
-    <button class="tab-btn" data-tab="summary" onclick="switchTab('summary')">Summary</button>
+    <button class="tab-btn active" data-action="tab" data-tab="tiers">Tiers &amp; Costing</button>
+    <button class="tab-btn" data-action="tab" data-tab="areas">Customers by Area</button>
+    <button class="tab-btn" data-action="tab" data-tab="appreciation">Customer Appreciation</button>
+    <button class="tab-btn" data-action="tab" data-tab="summary">Summary</button>
   </div>
 
   <!-- ============ TAB: TIERS & COSTING ============ -->
   <section class="tab-panel active" id="tab-tiers">
-
     <div class="card">
       <p class="eyebrow">Landed Cost Settings</p>
       <h2>Default landed-cost assumptions</h2>
       <p class="subtitle">Landed cost = China unit cost (USD) × 1.5 markup × exchange rate, converted to JMD.</p>
       <div class="settings-grid">
         <div class="field">
-          <label>Exchange rate (USD → JMD)</label>
-          <input type="number" id="set-fx" value="158" step="0.5" oninput="updateSettings()">
+          <label for="set-fx">Exchange rate (USD → JMD)</label>
+          <input type="text" class="num-input" inputmode="decimal" autocomplete="off" id="set-fx" data-kind="fx" data-num="decimal">
         </div>
       </div>
     </div>
-
     <div id="tiers-container"></div>
+  </section>
 
+  <!-- ============ TAB: CUSTOMERS BY AREA ============ -->
+  <section class="tab-panel" id="tab-areas">
+    <div class="card">
+      <p class="eyebrow">Dashboard</p>
+      <h2>Gifts by area</h2>
+      <p class="subtitle">Counts come from each area's customer list below. Est. cost = gifts × the tier's cost per gift (one of each item in the tier). Click a row to open that area.</p>
+      <div class="table-wrap" id="area-matrix"></div>
+    </div>
+    <div class="area-pills" id="area-pills"></div>
+    <div id="area-panel"></div>
   </section>
 
   <!-- ============ TAB: CUSTOMER APPRECIATION ============ -->
@@ -200,16 +232,16 @@
     <div class="card">
       <p class="eyebrow">Local Gift Bags</p>
       <h2>Customer Appreciation requests</h2>
-      <p class="subtitle">Separate from the tiered gifts above — locally-assembled bags given out (typically 5 at a time) to stores that request them for their own end-of-year customer appreciation.</p>
+      <p class="subtitle">Separate from the tiered gifts — locally-assembled bags given out (typically 5 at a time) to stores that request them for their own end-of-year customer appreciation.</p>
 
       <div class="appreciation-controls">
         <div class="field">
-          <label>Target allocation (bags)</label>
-          <input type="number" id="app-target" value="1000" oninput="updateAppreciationSettings()">
+          <label for="app-target">Target allocation (bags)</label>
+          <input type="text" class="num-input" inputmode="numeric" autocomplete="off" id="app-target" data-kind="appSetting" data-field="targetAllocation" data-num="int">
         </div>
         <div class="field">
-          <label>Default qty per request</label>
-          <input type="number" id="app-default-qty" value="5" oninput="updateAppreciationSettings()">
+          <label for="app-default-qty">Default qty per request</label>
+          <input type="text" class="num-input" inputmode="numeric" autocomplete="off" id="app-default-qty" data-kind="appSetting" data-field="defaultQty" data-num="int">
         </div>
       </div>
 
@@ -219,8 +251,9 @@
             <tr>
               <th>Customer</th>
               <th>Date</th>
-              <th>Area</th>
-              <th>Qty</th>
+              <th>Location</th>
+              <th>Sales Area</th>
+              <th class="num-cell">Qty</th>
               <th>Gift Type</th>
               <th>Status</th>
               <th>Notes</th>
@@ -230,7 +263,7 @@
           <tbody id="appreciation-tbody"></tbody>
         </table>
       </div>
-      <button class="add-row-btn" onclick="addAppreciationRow()">+ Add request</button>
+      <button class="add-row-btn" data-action="add-app">+ Add request</button>
 
       <div class="tier-footer">
         <div class="stat"><span class="num" id="app-total-requests">0</span><span class="lbl">Requests</span></div>
@@ -243,110 +276,156 @@
   <!-- ============ TAB: SUMMARY ============ -->
   <section class="tab-panel" id="tab-summary">
     <div class="summary-grid" id="summary-cards"></div>
-
     <div class="card">
       <p class="eyebrow">Breakdown</p>
       <h2>Landed cost by tier (JMD)</h2>
-      <div id="summary-bars" style="margin-top:16px;"></div>
+      <p class="subtitle">Order qty × landed cost per unit, from the Tiers &amp; Costing tab.</p>
+      <div id="summary-bars"></div>
+    </div>
+    <div class="card">
+      <p class="eyebrow">Breakdown</p>
+      <h2>Est. tiered-gift cost by area (JMD)</h2>
+      <p class="subtitle">Gifts assigned to each area's customers × each tier's cost per gift.</p>
+      <div id="summary-area-bars"></div>
     </div>
   </section>
 
 </div>
 
 <footer>
-  <p>DFL Importers — 2026 Gifting Tracker · Draft v1 · Changes save automatically. Use Export/Import for a manual backup or to restore a snapshot.</p>
+  <p>DFL Importers — 2026 Gifting Tracker · Changes save automatically to the shared database. “Download backup” saves a .json snapshot; “Restore backup” replaces everything with one.</p>
 </footer>
 
 <script>
 /* =========================================================================
    STATE
-   Loaded from / persisted to Supabase (gift_tracker_* tables) — see loadState()
-   and the save*() functions below. Export/Import JSON remain as a manual
-   backup/restore option on top of that.
    ========================================================================= */
 let state = {
   settings: { fx: 158 },
   tiers: [],
+  areas: [],
+  recipients: [],
   appreciation: { targetAllocation: 1000, defaultQty: 5, requests: [] }
 };
 
+const ui = { tab: 'tiers', area: null, filter: '' };
+const TABS = ['tiers', 'areas', 'appreciation', 'summary'];
+
 const MARKUP = 1.5; // baked-in China->landed markup, not user-editable
 
-function blankItem(name){
-  return { id: uid(), name: name || '', chinaCostUSD: 0, qty: 0 };
+function uid(){ return 'id_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+
+function num(v){
+  const n = parseFloat(String(v ?? '').replace(/[^0-9.\-]/g, ''));
+  return Number.isFinite(n) ? n : 0;
+}
+function int(v){ return Math.max(0, Math.round(num(v))); }
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function uid(){ return 'id_' + Math.random().toString(36).slice(2,10); }
+function fmtJMD(n){ return 'J$' + Math.round(n || 0).toLocaleString('en-US'); }
+function fmtNum(n){ return (n || 0).toLocaleString('en-US'); }
+function fmtPlain(n){ return (n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
+
+const tierById = id => state.tiers.find(t => t.id === id);
+const areaById = id => state.areas.find(a => a.id === id);
+const recipientById = id => state.recipients.find(r => r.id === id);
+const requestById = id => state.appreciation.requests.find(r => r.id === id);
 
 /* =========================================================================
-   LANDED COST CALC
-   Landed (JMD) = China unit cost (USD) x 1.5 markup x exchange rate
+   CALCS
    ========================================================================= */
-function calcLanded(item){
-  const landedJMD = (Number(item.chinaCostUSD) || 0) * MARKUP * (Number(state.settings.fx) || 0);
-  const lineTotalJMD = landedJMD * (Number(item.qty) || 0);
-  return { landedJMD, lineTotalJMD };
+function landedUnit(item){ return num(item.chinaCostUSD) * MARKUP * num(state.settings.fx); }
+function tierGiftCost(tier){ return tier.items.reduce((s, i) => s + landedUnit(i), 0); }
+function tierUnitsOrdered(tier){ return tier.items.reduce((s, i) => s + int(i.qty), 0); }
+function tierOrderTotal(tier){ return tier.items.reduce((s, i) => s + landedUnit(i) * int(i.qty), 0); }
+function tierGoal(tier){ return tier.issueQty != null ? int(tier.issueQty) : int(tier.targetQty); }
+
+function recipientsIn(areaId){ return state.recipients.filter(r => r.areaId === areaId); }
+function giftCount(recipients, tierId){ return recipients.reduce((s, r) => s + int(r.tierQty[tierId]), 0); }
+function recipientCost(r){ return state.tiers.reduce((s, t) => s + int(r.tierQty[t.id]) * tierGiftCost(t), 0); }
+function recipientsCost(recipients){ return recipients.reduce((s, r) => s + recipientCost(r), 0); }
+function appBagsIn(areaId){
+  return state.appreciation.requests.filter(r => r.salesAreaId === areaId).reduce((s, r) => s + int(r.qty), 0);
 }
 
-function fmtUSD(n){ return '$' + (n||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
-function fmtJMD(n){ return 'J$' + Math.round(n||0).toLocaleString('en-US'); }
-function fmtNum(n){ return (n||0).toLocaleString('en-US'); }
+/* =========================================================================
+   RENDER HELPERS
+   Inputs are only (re)built by render*() on structural changes (load, add,
+   remove, switching area). Typing only touches state + refreshComputed(),
+   which rewrites computed text and never replaces an <input>, so focus and
+   cursor position survive every keystroke.
+   ========================================================================= */
+function numInput(kind, field, value, mode, attrs = ''){
+  const inputmode = mode === 'int' ? 'numeric' : 'decimal';
+  return `<input type="text" class="num-input" inputmode="${inputmode}" autocomplete="off" data-kind="${kind}" data-field="${field}" data-num="${mode}" value="${esc(value)}" ${attrs}>`;
+}
+function textInput(kind, field, value, placeholder){
+  return `<input type="text" autocomplete="off" data-kind="${kind}" data-field="${field}" value="${esc(value)}" placeholder="${esc(placeholder)}">`;
+}
+
+function renderAll(){
+  document.getElementById('set-fx').value = state.settings.fx;
+  renderTiers();
+  renderAreas();
+  renderAppreciation();
+  refreshComputed();
+}
+
+function refreshComputed(){
+  refreshTierCalcs();
+  refreshAreaCalcs();
+  refreshAppreciationTotals();
+  if (ui.tab === 'summary') renderSummary();
+}
 
 /* =========================================================================
-   RENDER: TIERS
+   TIERS & COSTING
    ========================================================================= */
 function renderTiers(){
-  const container = document.getElementById('tiers-container');
-  container.innerHTML = state.tiers.map(tier => renderTierCard(tier)).join('');
+  document.getElementById('tiers-container').innerHTML = state.tiers.map(renderTierCard).join('');
 }
 
 function renderTierCard(tier){
-  let totalQty = 0, totalLandedJMD = 0;
-  const rows = tier.items.map(item => {
-    const c = calcLanded(item);
-    totalQty += Number(item.qty) || 0;
-    totalLandedJMD += c.lineTotalJMD;
-    return `
-      <tr data-tier="${tier.id}" data-item="${item.id}">
-        <td class="col-name"><input type="text" value="${escapeAttr(item.name)}" oninput="updateItem('${tier.id}','${item.id}','name',this.value)" placeholder="Item name"></td>
-        <td><input type="number" step="0.01" value="${item.chinaCostUSD}" oninput="updateItem('${tier.id}','${item.id}','chinaCostUSD',this.value)"></td>
-        <td class="num-cell landed-cell">${fmtJMD(c.landedJMD)}</td>
-        <td><input type="number" step="1" value="${item.qty}" oninput="updateItem('${tier.id}','${item.id}','qty',this.value)"></td>
-        <td class="num-cell line-total-cell">${fmtJMD(c.lineTotalJMD)}</td>
-        <td><button class="row-remove" onclick="removeItem('${tier.id}','${item.id}')" title="Remove item">&times;</button></td>
-      </tr>`;
-  }).join('');
-
-  const qtyExtra = tier.issueQty != null ? `
-      <div class="field">
-        <label>Issue qty</label>
-        <input type="number" value="${tier.issueQty}" oninput="updateTier('${tier.id}','issueQty',this.value)">
-      </div>
-      <div class="field">
-        <label>Extra / buffer</label>
-        <input type="number" value="${tier.extraQty}" oninput="updateTier('${tier.id}','extraQty',this.value)">
-      </div>` : '';
+  const hasIssue = tier.issueQty != null;
+  const rows = tier.items.length ? tier.items.map(item => `
+      <tr data-item="${esc(item.id)}">
+        <td class="col-name">${textInput('item', 'name', item.name, 'Item name')}</td>
+        <td>${numInput('item', 'chinaCostUSD', item.chinaCostUSD, 'decimal')}</td>
+        <td class="num-cell landed-cell" data-calc="landed"></td>
+        <td>${numInput('item', 'qty', item.qty, 'int')}</td>
+        <td class="num-cell line-total-cell" data-calc="line"></td>
+        <td><button class="row-remove" data-action="remove-item" title="Remove item">&times;</button></td>
+      </tr>`).join('')
+    : `<tr class="empty-row"><td colspan="6">No items yet — add one below.</td></tr>`;
 
   return `
-    <div class="card">
+    <div class="card" data-tier="${esc(tier.id)}">
       <div class="tier-head">
         <div class="tier-title">
-          <div class="tier-pill ${tier.pillClass}">${tier.name.slice(0,2).toUpperCase()}</div>
-          <h2>${tier.name}</h2>
+          <div class="tier-pill ${esc(tier.pillClass)}">${esc(tier.name.slice(0,2).toUpperCase())}</div>
+          <h2>${esc(tier.name)}</h2>
         </div>
-        <div class="tier-stats">
-          <div class="stat"><span class="num">${fmtNum(tier.targetQty)}</span><span class="lbl">Target Units</span></div>
-          <div class="stat"><span class="num">${fmtNum(totalQty)}</span><span class="lbl">Qty Entered</span></div>
-        </div>
+        <div class="tier-stats" data-calc="tier-stats"></div>
       </div>
 
       <div class="qty-inline">
         <div class="field">
           <label>Target qty (tier)</label>
-          <input type="number" value="${tier.targetQty}" oninput="updateTier('${tier.id}','targetQty',this.value)">
+          ${numInput('tier', 'targetQty', tier.targetQty, 'int', hasIssue ? 'readonly title="Issue qty + extra"' : '')}
         </div>
-        ${qtyExtra}
-        <span class="qty-note">${tier.issueQty != null ? `${fmtNum(tier.issueQty)} to issue + ${fmtNum(tier.extraQty)} extra = ${fmtNum((Number(tier.issueQty)||0)+(Number(tier.extraQty)||0))} target` : ''}</span>
+        ${hasIssue ? `
+        <div class="field">
+          <label>Issue qty</label>
+          ${numInput('tier', 'issueQty', tier.issueQty, 'int')}
+        </div>
+        <div class="field">
+          <label>Extra / buffer</label>
+          ${numInput('tier', 'extraQty', tier.extraQty, 'int')}
+        </div>` : ''}
+        <span class="qty-note" data-calc="tier-note"></span>
       </div>
 
       <div class="table-wrap">
@@ -354,199 +433,368 @@ function renderTierCard(tier){
           <thead>
             <tr>
               <th>Item</th>
-              <th>China Cost (USD)</th>
-              <th>Landed Cost/unit (JMD)</th>
-              <th>Qty</th>
-              <th>Line Total (JMD)</th>
+              <th class="num-cell">China Cost (USD)</th>
+              <th class="num-cell">Landed Cost/unit (JMD)</th>
+              <th class="num-cell">Order Qty</th>
+              <th class="num-cell">Line Total (JMD)</th>
               <th></th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
-      <button class="add-row-btn" onclick="addItem('${tier.id}')">+ Add item</button>
+      <button class="add-row-btn" data-action="add-item">+ Add item</button>
 
-      <div class="tier-footer">
-        <div class="stat"><span class="num">${fmtNum(totalQty)}</span><span class="lbl">Total Units (items)</span></div>
-        <div class="stat"><span class="num">${fmtJMD(totalLandedJMD)}</span><span class="lbl">Est. Landed Total</span></div>
-      </div>
+      <div class="tier-footer" data-calc="tier-footer"></div>
     </div>`;
 }
 
-function escapeAttr(s){ return String(s ?? '').replace(/"/g,'&quot;'); }
+function refreshTierCalcs(){
+  document.querySelectorAll('#tiers-container [data-tier]').forEach(card => {
+    const tier = tierById(card.dataset.tier);
+    if (!tier) return;
 
-function updateSettings(){
-  state.settings.fx = document.getElementById('set-fx').value;
-  renderAll();
-  scheduleSave('settings', () => sb.from('gift_tracker_settings').update({
-    fx: Number(state.settings.fx) || 0, updated_at: new Date().toISOString()
-  }).eq('id', 1));
-}
+    card.querySelectorAll('tr[data-item]').forEach(tr => {
+      const item = tier.items.find(i => i.id === tr.dataset.item);
+      if (!item) return;
+      const landed = landedUnit(item);
+      tr.querySelector('[data-calc="landed"]').textContent = fmtJMD(landed);
+      tr.querySelector('[data-calc="line"]').textContent = fmtJMD(landed * int(item.qty));
+    });
 
-function updateTier(tierId, field, value){
-  const tier = state.tiers.find(t => t.id === tierId);
-  tier[field] = value === '' ? 0 : Number(value);
-  renderAll();
-  scheduleSave('tier:' + tierId, () => sb.from('gift_tracker_tiers').update({
-    target_qty: Number(tier.targetQty) || 0,
-    issue_qty: tier.issueQty == null ? null : Number(tier.issueQty),
-    extra_qty: tier.extraQty == null ? null : Number(tier.extraQty)
-  }).eq('id', tierId));
-}
+    const assigned = giftCount(state.recipients, tier.id);
+    const left = tierGoal(tier) - assigned;
+    card.querySelector('[data-calc="tier-stats"]').innerHTML = `
+      <div class="stat"><span class="num">${fmtNum(int(tier.targetQty))}</span><span class="lbl">Target Units</span></div>
+      <div class="stat"><span class="num">${fmtNum(assigned)}</span><span class="lbl">Assigned to Customers</span></div>
+      <div class="stat"><span class="num ${left < 0 ? 'over' : ''}">${left < 0 ? 'Over by ' + fmtNum(-left) : fmtNum(left)}</span><span class="lbl">Left to Assign</span></div>`;
 
-function updateItem(tierId, itemId, field, value){
-  const tier = state.tiers.find(t => t.id === tierId);
-  const item = tier.items.find(i => i.id === itemId);
-  if (field === 'name') {
-    item.name = value;
-  } else {
-    item[field] = value === '' ? 0 : Number(value);
-  }
-  renderAll();
-  scheduleSave('item:' + itemId, () => sb.from('gift_tracker_items').update({
-    name: item.name, china_cost_usd: Number(item.chinaCostUSD) || 0, qty: Number(item.qty) || 0
-  }).eq('id', itemId));
-}
+    card.querySelector('[data-calc="tier-note"]').textContent = tier.issueQty != null
+      ? `${fmtNum(int(tier.issueQty))} to issue + ${fmtNum(int(tier.extraQty))} extra = ${fmtNum(int(tier.targetQty))} target. “Left to assign” counts against the ${fmtNum(int(tier.issueQty))} to issue.`
+      : '';
 
-function addItem(tierId){
-  const tier = state.tiers.find(t => t.id === tierId);
-  const item = blankItem('');
-  tier.items.push(item);
-  renderAll();
-  saveNow(() => sb.from('gift_tracker_items').insert({
-    id: item.id, tier_id: tierId, name: item.name, china_cost_usd: item.chinaCostUSD, qty: item.qty, sort_order: tier.items.length - 1
-  }));
-}
-
-function removeItem(tierId, itemId){
-  const tier = state.tiers.find(t => t.id === tierId);
-  tier.items = tier.items.filter(i => i.id !== itemId);
-  let replacement = null;
-  if (tier.items.length === 0) {
-    replacement = blankItem('');
-    tier.items.push(replacement);
-  }
-  renderAll();
-  saveNow(async () => {
-    await sb.from('gift_tracker_items').delete().eq('id', itemId);
-    if (replacement) {
-      await sb.from('gift_tracker_items').insert({
-        id: replacement.id, tier_id: tierId, name: replacement.name, china_cost_usd: replacement.chinaCostUSD, qty: replacement.qty, sort_order: 0
-      });
-    }
+    const ordered = tierUnitsOrdered(tier);
+    card.querySelector('[data-calc="tier-footer"]').innerHTML = `
+      <div class="stat"><span class="num">${fmtNum(ordered)}</span><span class="lbl">Units Ordered (all items)</span></div>
+      <div class="stat"><span class="num">${fmtJMD(tierGiftCost(tier))}</span><span class="lbl">Cost per Gift (1 of each item)</span></div>
+      <div class="stat"><span class="num">${fmtJMD(tierOrderTotal(tier))}</span><span class="lbl">Est. Landed Total</span></div>`;
   });
 }
 
+function addItem(tierId){
+  const tier = tierById(tierId);
+  const item = { id: uid(), name: '', chinaCostUSD: 0, qty: int(tier.targetQty) };
+  tier.items.push(item);
+  renderTiers();
+  refreshComputed();
+  focusIn(`#tiers-container tr[data-item="${CSS.escape(item.id)}"] input`);
+  saveNow(() => sb.from('gift_tracker_items').upsert(itemDb(tier, item)));
+}
+
+function removeItem(tierId, itemId){
+  const tier = tierById(tierId);
+  const item = tier.items.find(i => i.id === itemId);
+  if (item.name && !confirm(`Remove “${item.name}” from ${tier.name}?`)) return;
+  cancelSave('item:' + itemId);
+  tier.items = tier.items.filter(i => i.id !== itemId);
+  renderTiers();
+  refreshComputed();
+  saveNow(() => sb.from('gift_tracker_items').delete().eq('id', itemId));
+}
+
 /* =========================================================================
-   RENDER: CUSTOMER APPRECIATION
+   CUSTOMERS BY AREA
    ========================================================================= */
+function renderAreas(){
+  const panel = document.getElementById('area-panel');
+  if (!state.areas.length){
+    panel.innerHTML = `<div class="card"><p class="subtitle" style="margin:0">No areas found.</p></div>`;
+    return;
+  }
+  if (!areaById(ui.area)) ui.area = state.areas[0].id;
+  const area = areaById(ui.area);
+  const repLabel = area.id === 'other' ? 'Person Responsible' : 'Sales Rep';
+  const list = recipientsIn(area.id);
+  const cols = 6 + state.tiers.length;
+
+  const rows = list.length ? list.map(r => `
+      <tr data-recipient="${esc(r.id)}">
+        <td class="col-name">${textInput('recipient', 'customer', r.customer, 'Customer name')}</td>
+        <td>${textInput('recipient', 'salesRep', r.salesRep, repLabel)}</td>
+        <td>${numInput('recipient', 'totalYtd', r.totalYtd ? fmtPlain(num(r.totalYtd)) : '', 'money', 'placeholder="0"')}</td>
+        ${state.tiers.map(t => `<td class="col-tier">${numInput('recipient', 'tier', int(r.tierQty[t.id]) || '', 'int', `data-tier-id="${esc(t.id)}" data-blank-zero placeholder="–"`)}</td>`).join('')}
+        <td class="num-cell line-total-cell" data-calc="rcost"></td>
+        <td>${textInput('recipient', 'notes', r.notes, 'Notes')}</td>
+        <td><button class="row-remove" data-action="remove-recipient" title="Remove customer">&times;</button></td>
+      </tr>`).join('')
+    : `<tr class="empty-row"><td colspan="${cols}">No customers in this area yet — add one below.</td></tr>`;
+
+  panel.innerHTML = `
+    <div class="card" data-area="${esc(area.id)}">
+      <p class="eyebrow">Area</p>
+      <h2 data-calc="area-title"></h2>
+      <p class="subtitle">Enter each customer getting a gift and how many of each tier they get.</p>
+      <div class="settings-grid" style="margin-bottom:16px;">
+        <div class="field">
+          <label>Area name</label>
+          ${textInput('area', 'name', area.name, 'Area name')}
+        </div>
+        <div class="field">
+          <label>Area manager</label>
+          ${textInput('area', 'manager', area.manager, 'Area manager')}
+        </div>
+        <div class="field">
+          <label>Find customer</label>
+          <input type="search" autocomplete="off" data-kind="filter" value="${esc(ui.filter)}" placeholder="Search this area…">
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>${repLabel}</th>
+              <th class="num-cell">Total YTD (JMD)</th>
+              ${state.tiers.map(t => `<th class="num-cell">${esc(t.name)}</th>`).join('')}
+              <th class="num-cell">Est. Cost</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+          <tfoot data-calc="area-foot"></tfoot>
+        </table>
+      </div>
+      <button class="add-row-btn" data-action="add-recipient">+ Add customer</button>
+    </div>`;
+
+  applyFilter();
+}
+
+function refreshAreaCalcs(){
+  const tiers = state.tiers;
+
+  document.getElementById('area-pills').innerHTML = state.areas.map(a => {
+    const n = tiers.reduce((s, t) => s + giftCount(recipientsIn(a.id), t.id), 0);
+    return `<button class="area-pill ${a.id === ui.area ? 'active' : ''}" data-action="select-area" data-area="${esc(a.id)}">${esc(a.name || 'Unnamed')} <span class="count">${fmtNum(n)}</span></button>`;
+  }).join('');
+
+  const areaRows = state.areas.map(a => {
+    const list = recipientsIn(a.id);
+    return `
+      <tr class="${a.id === ui.area ? 'active' : ''}" data-action="select-area" data-area="${esc(a.id)}">
+        <td><strong>${esc(a.name || 'Unnamed')}</strong></td>
+        <td>${esc(a.manager) || '—'}</td>
+        ${tiers.map(t => `<td>${fmtNum(giftCount(list, t.id))}</td>`).join('')}
+        <td>${fmtNum(appBagsIn(a.id))}</td>
+        <td>${fmtJMD(recipientsCost(list))}</td>
+      </tr>`;
+  }).join('');
+
+  const allBags = state.appreciation.requests.reduce((s, r) => s + int(r.qty), 0);
+  const unassignedBags = allBags - state.areas.reduce((s, a) => s + appBagsIn(a.id), 0);
+  document.getElementById('area-matrix').innerHTML = `
+    <table class="matrix">
+      <thead>
+        <tr><th>Area</th><th>Manager</th>${tiers.map(t => `<th>${esc(t.name)}</th>`).join('')}<th>Appreciation Bags</th><th>Est. Cost (tiered)</th></tr>
+      </thead>
+      <tbody>${areaRows}</tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td><td></td>
+          ${tiers.map(t => { const n = giftCount(state.recipients, t.id); return `<td class="${n > tierGoal(t) ? 'over' : ''}">${fmtNum(n)}</td>`; }).join('')}
+          <td>${fmtNum(allBags)}${unassignedBags > 0 ? ` <span style="font-weight:600;color:var(--text-faint)">(${fmtNum(unassignedBags)} no area)</span>` : ''}</td>
+          <td>${fmtJMD(recipientsCost(state.recipients))}</td>
+        </tr>
+        <tr>
+          <td>Available to issue</td><td></td>
+          ${tiers.map(t => `<td>${fmtNum(tierGoal(t))}</td>`).join('')}
+          <td>${fmtNum(int(state.appreciation.targetAllocation))}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>`;
+
+  const card = document.querySelector('#area-panel [data-area]');
+  if (!card) return;
+  const area = areaById(card.dataset.area);
+  if (!area) return;
+  card.querySelector('[data-calc="area-title"]').textContent =
+    `${area.name || 'Unnamed area'}${area.manager ? ' — ' + area.manager : ''}`;
+
+  card.querySelectorAll('tr[data-recipient]').forEach(tr => {
+    const r = recipientById(tr.dataset.recipient);
+    if (r) tr.querySelector('[data-calc="rcost"]').textContent = fmtJMD(recipientCost(r));
+  });
+
+  const list = recipientsIn(area.id);
+  const ytd = list.reduce((s, r) => s + num(r.totalYtd), 0);
+  card.querySelector('[data-calc="area-foot"]').innerHTML = `
+    <tr>
+      <td>${fmtNum(list.length)} customer${list.length === 1 ? '' : 's'}</td>
+      <td></td>
+      <td class="num-cell">${fmtJMD(ytd)}</td>
+      ${tiers.map(t => `<td class="num-cell">${fmtNum(giftCount(list, t.id))}</td>`).join('')}
+      <td class="num-cell">${fmtJMD(recipientsCost(list))}</td>
+      <td></td><td></td>
+    </tr>`;
+}
+
+function applyFilter(){
+  const q = ui.filter.trim().toLowerCase();
+  document.querySelectorAll('#area-panel tr[data-recipient]').forEach(tr => {
+    const r = recipientById(tr.dataset.recipient);
+    const hay = `${r.customer} ${r.salesRep} ${r.notes}`.toLowerCase();
+    tr.style.display = !q || hay.includes(q) ? '' : 'none';
+  });
+}
+
+function selectArea(areaId){
+  if (ui.area === areaId) return;
+  flushSaves();
+  ui.area = areaId;
+  ui.filter = '';
+  saveUi();
+  renderAreas();
+  refreshComputed();
+}
+
+function addRecipient(){
+  const r = { id: uid(), areaId: ui.area, customer: '', salesRep: '', totalYtd: 0, tierQty: {}, notes: '' };
+  state.recipients.push(r);
+  ui.filter = '';
+  renderAreas();
+  refreshComputed();
+  focusIn(`#area-panel tr[data-recipient="${CSS.escape(r.id)}"] input`);
+  saveNow(() => sb.from('gift_tracker_recipients').upsert(recipientDb(r)));
+}
+
+function removeRecipient(id){
+  const r = recipientById(id);
+  if (r.customer && !confirm(`Remove “${r.customer}” from this area?`)) return;
+  cancelSave('recipient:' + id);
+  state.recipients = state.recipients.filter(x => x.id !== id);
+  renderAreas();
+  refreshComputed();
+  saveNow(() => sb.from('gift_tracker_recipients').delete().eq('id', id));
+}
+
+/* =========================================================================
+   CUSTOMER APPRECIATION
+   ========================================================================= */
+function areaOptions(selected){
+  return `<option value="">—</option>` + state.areas.map(a =>
+    `<option value="${esc(a.id)}" ${a.id === selected ? 'selected' : ''}>${esc(a.name)}</option>`).join('');
+}
+
 function renderAppreciation(){
   document.getElementById('app-target').value = state.appreciation.targetAllocation;
   document.getElementById('app-default-qty').value = state.appreciation.defaultQty;
 
-  const tbody = document.getElementById('appreciation-tbody');
-  tbody.innerHTML = state.appreciation.requests.map(req => `
-    <tr data-req="${req.id}">
-      <td><input type="text" value="${escapeAttr(req.customer)}" oninput="updateAppRow('${req.id}','customer',this.value)" placeholder="Customer name"></td>
-      <td><input type="date" value="${req.date || ''}" oninput="updateAppRow('${req.id}','date',this.value)"></td>
-      <td><input type="text" value="${escapeAttr(req.area)}" oninput="updateAppRow('${req.id}','area',this.value)" placeholder="Area"></td>
-      <td><input type="number" value="${req.qty}" oninput="updateAppRow('${req.id}','qty',this.value)"></td>
-      <td><input type="text" value="${escapeAttr(req.giftType)}" oninput="updateAppRow('${req.id}','giftType',this.value)" placeholder="Gift Bag"></td>
+  const reqs = state.appreciation.requests;
+  document.getElementById('appreciation-tbody').innerHTML = reqs.length ? reqs.map(req => `
+    <tr data-req="${esc(req.id)}">
+      <td class="col-name">${textInput('appReq', 'customer', req.customer, 'Customer name')}</td>
+      <td><input type="date" data-kind="appReq" data-field="date" value="${esc(req.date)}"></td>
+      <td>${textInput('appReq', 'area', req.area, 'e.g. Mandeville')}</td>
+      <td><select data-kind="appReq" data-field="salesAreaId">${areaOptions(req.salesAreaId)}</select></td>
+      <td>${numInput('appReq', 'qty', req.qty, 'int')}</td>
+      <td>${textInput('appReq', 'giftType', req.giftType, 'Gift Bag')}</td>
       <td>
-        <span class="status-toggle ${req.completed ? 'status-sent' : 'status-pending'}" onclick="toggleAppStatus('${req.id}')">
+        <button class="status-toggle ${req.completed ? 'status-sent' : 'status-pending'}" data-action="toggle-app">
           ${req.completed
             ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Sent'
             : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="9"/></svg> Pending'}
-        </span>
+        </button>
       </td>
-      <td><input type="text" value="${escapeAttr(req.notes)}" oninput="updateAppRow('${req.id}','notes',this.value)" placeholder="Notes"></td>
-      <td><button class="row-remove" onclick="removeAppRow('${req.id}')" title="Remove">&times;</button></td>
-    </tr>`).join('');
-
-  const totalRequests = state.appreciation.requests.length;
-  const totalQty = state.appreciation.requests.reduce((sum, r) => sum + (Number(r.qty) || 0), 0);
-  document.getElementById('app-total-requests').textContent = fmtNum(totalRequests);
-  document.getElementById('app-total-qty').textContent = fmtNum(totalQty);
-  document.getElementById('app-remaining').textContent = fmtNum((Number(state.appreciation.targetAllocation) || 0) - totalQty);
+      <td>${textInput('appReq', 'notes', req.notes, 'Notes')}</td>
+      <td><button class="row-remove" data-action="remove-app" title="Remove">&times;</button></td>
+    </tr>`).join('')
+    : `<tr class="empty-row"><td colspan="9">No requests yet — add one below.</td></tr>`;
 }
 
-function updateAppreciationSettings(){
-  state.appreciation.targetAllocation = Number(document.getElementById('app-target').value) || 0;
-  state.appreciation.defaultQty = Number(document.getElementById('app-default-qty').value) || 0;
-  renderAppreciation();
-  scheduleSave('appSettings', () => sb.from('gift_tracker_appreciation_settings').update({
-    target_allocation: state.appreciation.targetAllocation,
-    default_qty: state.appreciation.defaultQty,
-    updated_at: new Date().toISOString()
-  }).eq('id', 1));
+function refreshAppreciationTotals(){
+  const reqs = state.appreciation.requests;
+  const totalQty = reqs.reduce((s, r) => s + int(r.qty), 0);
+  const remaining = int(state.appreciation.targetAllocation) - totalQty;
+  document.getElementById('app-total-requests').textContent = fmtNum(reqs.length);
+  document.getElementById('app-total-qty').textContent = fmtNum(totalQty);
+  const rem = document.getElementById('app-remaining');
+  rem.textContent = fmtNum(remaining);
+  rem.classList.toggle('over', remaining < 0);
 }
 
 function addAppreciationRow(){
   const req = {
-    id: uid(), customer: '', date: '', area: '',
-    qty: state.appreciation.defaultQty, giftType: 'Gift Bag',
-    completed: false, notes: ''
+    id: uid(), customer: '', date: new Date().toISOString().slice(0,10), area: '', salesAreaId: '',
+    qty: int(state.appreciation.defaultQty), giftType: 'Gift Bag', completed: false, notes: ''
   };
   state.appreciation.requests.push(req);
   renderAppreciation();
-  saveNow(() => sb.from('gift_tracker_appreciation_requests').insert({
-    id: req.id, customer: req.customer, request_date: null, area: req.area,
-    qty: req.qty, gift_type: req.giftType, completed: req.completed, notes: req.notes
-  }));
-}
-
-function updateAppRow(id, field, value){
-  const req = state.appreciation.requests.find(r => r.id === id);
-  req[field] = (field === 'qty') ? (Number(value) || 0) : value;
-  renderAppreciation();
-  scheduleSave('appReq:' + id, () => sb.from('gift_tracker_appreciation_requests').update({
-    customer: req.customer, request_date: req.date || null, area: req.area,
-    qty: Number(req.qty) || 0, gift_type: req.giftType, notes: req.notes
-  }).eq('id', id));
+  refreshComputed();
+  focusIn(`#appreciation-tbody tr[data-req="${CSS.escape(req.id)}"] input`);
+  saveNow(() => sb.from('gift_tracker_appreciation_requests').upsert(requestDb(req)));
 }
 
 function toggleAppStatus(id){
-  const req = state.appreciation.requests.find(r => r.id === id);
+  const req = requestById(id);
   req.completed = !req.completed;
   renderAppreciation();
-  saveNow(() => sb.from('gift_tracker_appreciation_requests').update({ completed: req.completed }).eq('id', id));
+  refreshComputed();
+  saveNow(() => sb.from('gift_tracker_appreciation_requests').upsert(requestDb(req)));
 }
 
 function removeAppRow(id){
+  const req = requestById(id);
+  if (req.customer && !confirm(`Remove the request for “${req.customer}”?`)) return;
+  cancelSave('appReq:' + id);
   state.appreciation.requests = state.appreciation.requests.filter(r => r.id !== id);
   renderAppreciation();
+  refreshComputed();
   saveNow(() => sb.from('gift_tracker_appreciation_requests').delete().eq('id', id));
 }
 
 /* =========================================================================
-   RENDER: SUMMARY
+   SUMMARY
    ========================================================================= */
-function renderSummary(){
-  const tierTotals = state.tiers.map(tier => {
-    const qty = tier.items.reduce((s,i) => s + (Number(i.qty)||0), 0);
-    const landed = tier.items.reduce((s,i) => s + calcLanded(i).lineTotalJMD, 0);
-    return { name: tier.name, qty, landed };
-  });
-  const grandTotalJMD = tierTotals.reduce((s,t) => s + t.landed, 0);
-  const grandTotalQty = tierTotals.reduce((s,t) => s + t.qty, 0);
-  const appQty = state.appreciation.requests.reduce((s,r) => s + (Number(r.qty)||0), 0);
+function bars(rows, colorFor){
+  const max = Math.max(...rows.map(r => r.value), 1);
+  return rows.map(r => `
+    <div class="bar-row">
+      <div class="bar-label">${esc(r.label)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(r.value / max * 100).toFixed(1)}%; background:${colorFor(r)};"></div></div>
+      <div class="bar-value">${fmtJMD(r.value)}</div>
+    </div>`).join('');
+}
 
-  const cards = document.getElementById('summary-cards');
-  cards.innerHTML = `
+function renderSummary(){
+  const orderedQty = state.tiers.reduce((s, t) => s + tierUnitsOrdered(t), 0);
+  const orderTotal = state.tiers.reduce((s, t) => s + tierOrderTotal(t), 0);
+  const assigned = state.tiers.reduce((s, t) => s + giftCount(state.recipients, t.id), 0);
+  const goal = state.tiers.reduce((s, t) => s + tierGoal(t), 0);
+  const appQty = state.appreciation.requests.reduce((s, r) => s + int(r.qty), 0);
+
+  document.getElementById('summary-cards').innerHTML = `
     <div class="summary-card">
-      <p class="eyebrow">Tiered Gifts</p>
-      <div class="big">${fmtNum(grandTotalQty)}</div>
-      <div class="sub">units across Platinum / Gold / Silver</div>
+      <p class="eyebrow">Tiered Gifts Ordered</p>
+      <div class="big">${fmtNum(orderedQty)}</div>
+      <div class="sub">item units across ${esc(state.tiers.map(t => t.name).join(' / '))}</div>
     </div>
     <div class="summary-card">
       <p class="eyebrow">Est. Landed Budget</p>
-      <div class="big">${fmtJMD(grandTotalJMD)}</div>
+      <div class="big">${fmtJMD(orderTotal)}</div>
       <div class="sub">tiered gifts only, China → Jamaica</div>
+    </div>
+    <div class="summary-card">
+      <p class="eyebrow">Assigned to Customers</p>
+      <div class="big">${fmtNum(assigned)}</div>
+      <div class="sub">of ${fmtNum(goal)} tiered gifts to issue</div>
     </div>
     <div class="summary-card">
       <p class="eyebrow">Customer Appreciation</p>
       <div class="big">${fmtNum(appQty)}</div>
-      <div class="sub">of ${fmtNum(state.appreciation.targetAllocation)} bags target</div>
+      <div class="sub">of ${fmtNum(int(state.appreciation.targetAllocation))} bags target</div>
     </div>
     <div class="summary-card">
       <p class="eyebrow">2025 Reference</p>
@@ -554,31 +802,170 @@ function renderSummary(){
       <div class="sub">total spend, last year's costing tab</div>
     </div>`;
 
-  const maxLanded = Math.max(...tierTotals.map(t => t.landed), 1);
-  const colors = {'Platinum':'#5b6472','Gold':'#c8922a','Silver':'#8b96a4'};
-  document.getElementById('summary-bars').innerHTML = tierTotals.map(t => `
-    <div class="bar-row">
-      <div class="bar-label">${t.name}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(t.landed/maxLanded*100).toFixed(1)}%; background:${colors[t.name]||'#2563eb'};"></div></div>
-      <div class="bar-value">${fmtJMD(t.landed)}</div>
-    </div>`).join('');
+  const tierColors = { Platinum: '#5b6472', Gold: '#c8922a', Silver: '#8b96a4', Bronze: '#9a5f34' };
+  document.getElementById('summary-bars').innerHTML =
+    bars(state.tiers.map(t => ({ label: t.name, value: tierOrderTotal(t) })), r => tierColors[r.label] || '#2563eb');
+  document.getElementById('summary-area-bars').innerHTML =
+    bars(state.areas.map(a => ({ label: a.name || 'Unnamed', value: recipientsCost(recipientsIn(a.id)) })), () => '#2563eb');
 }
 
 /* =========================================================================
-   TABS
+   TABS / UI PREFS
    ========================================================================= */
 function switchTab(tab){
+  if (!TABS.includes(tab)) tab = 'tiers';
+  ui.tab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
   if (tab === 'summary') renderSummary();
+  saveUi();
+}
+
+function loadUi(){
+  try { Object.assign(ui, JSON.parse(localStorage.getItem('giftTrackerUi') || '{}')); } catch (e) {}
+  ui.filter = '';
+}
+function saveUi(){
+  try { localStorage.setItem('giftTrackerUi', JSON.stringify({ tab: ui.tab, area: ui.area })); } catch (e) {}
+}
+
+function focusIn(selector){
+  const el = document.querySelector(selector);
+  if (el) el.focus();
 }
 
 /* =========================================================================
-   EXPORT / IMPORT (manual persistence for this draft)
+   EVENTS (delegated — no inline handlers)
+   ========================================================================= */
+const inputHandlers = {
+  fx(el){
+    state.settings.fx = num(el.value);
+    scheduleSave('settings', () => sb.from('gift_tracker_settings')
+      .update({ fx: num(state.settings.fx), updated_at: new Date().toISOString() }).eq('id', 1));
+  },
+
+  tier(el){
+    const card = el.closest('[data-tier]');
+    const tier = tierById(card.dataset.tier);
+    tier[el.dataset.field] = int(el.value);
+    if (tier.issueQty != null && el.dataset.field !== 'targetQty'){
+      tier.targetQty = int(tier.issueQty) + int(tier.extraQty);
+      card.querySelector('[data-field="targetQty"]').value = tier.targetQty;
+    }
+    scheduleSave('tier:' + tier.id, () => sb.from('gift_tracker_tiers').update({
+      target_qty: int(tier.targetQty),
+      issue_qty: tier.issueQty == null ? null : int(tier.issueQty),
+      extra_qty: tier.extraQty == null ? null : int(tier.extraQty)
+    }).eq('id', tier.id));
+  },
+
+  item(el){
+    const tier = tierById(el.closest('[data-tier]').dataset.tier);
+    const item = tier.items.find(i => i.id === el.closest('[data-item]').dataset.item);
+    const f = el.dataset.field;
+    item[f] = f === 'name' ? el.value : f === 'qty' ? int(el.value) : num(el.value);
+    scheduleSave('item:' + item.id, () => sb.from('gift_tracker_items').upsert(itemDb(tier, item)));
+  },
+
+  appSetting(el){
+    state.appreciation[el.dataset.field] = int(el.value);
+    scheduleSave('appSettings', () => sb.from('gift_tracker_appreciation_settings').update({
+      target_allocation: int(state.appreciation.targetAllocation),
+      default_qty: int(state.appreciation.defaultQty),
+      updated_at: new Date().toISOString()
+    }).eq('id', 1));
+  },
+
+  appReq(el){
+    const req = requestById(el.closest('[data-req]').dataset.req);
+    req[el.dataset.field] = el.dataset.field === 'qty' ? int(el.value) : el.value;
+    scheduleSave('appReq:' + req.id, () => sb.from('gift_tracker_appreciation_requests').upsert(requestDb(req)));
+  },
+
+  area(el){
+    const area = areaById(el.closest('[data-area]').dataset.area);
+    area[el.dataset.field] = el.value;
+    if (el.dataset.field === 'name'){
+      document.querySelectorAll(`select[data-field="salesAreaId"] option[value="${CSS.escape(area.id)}"]`)
+        .forEach(o => { o.textContent = area.name; });
+    }
+    scheduleSave('area:' + area.id, () => sb.from('gift_tracker_areas')
+      .update({ name: area.name, manager: area.manager }).eq('id', area.id));
+  },
+
+  recipient(el){
+    const r = recipientById(el.closest('[data-recipient]').dataset.recipient);
+    const f = el.dataset.field;
+    if (f === 'tier') {
+      const q = int(el.value);
+      if (q) r.tierQty[el.dataset.tierId] = q; else delete r.tierQty[el.dataset.tierId];
+    } else {
+      r[f] = f === 'totalYtd' ? num(el.value) : el.value;
+    }
+    scheduleSave('recipient:' + r.id, () => sb.from('gift_tracker_recipients').upsert(recipientDb(r)));
+  },
+
+  filter(el){
+    ui.filter = el.value;
+    applyFilter();
+  }
+};
+
+document.addEventListener('input', e => {
+  const handler = inputHandlers[e.target.dataset.kind];
+  if (!handler) return;
+  handler(e.target);
+  if (e.target.dataset.kind !== 'filter') refreshComputed();
+});
+
+// Leaving a field: tidy the number display and save straight away.
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (!el.dataset.kind) return;
+  const mode = el.dataset.num;
+  if (mode === 'int'){
+    const v = int(el.value);
+    el.value = v === 0 && el.hasAttribute('data-blank-zero') ? '' : String(v);
+  } else if (mode === 'decimal'){
+    el.value = String(num(el.value));
+  } else if (mode === 'money'){
+    const v = num(el.value);
+    el.value = v ? fmtPlain(v) : '';
+  }
+  flushSaves();
+});
+
+document.addEventListener('focusin', e => {
+  if (e.target.classList?.contains('num-input') && !e.target.readOnly) e.target.select();
+});
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const tierId = el.closest('[data-tier]')?.dataset.tier;
+  switch (el.dataset.action){
+    case 'tab': switchTab(el.dataset.tab); break;
+    case 'add-item': addItem(tierId); break;
+    case 'remove-item': removeItem(tierId, el.closest('[data-item]').dataset.item); break;
+    case 'select-area': selectArea(el.dataset.area); break;
+    case 'add-recipient': addRecipient(); break;
+    case 'remove-recipient': removeRecipient(el.closest('[data-recipient]').dataset.recipient); break;
+    case 'add-app': addAppreciationRow(); break;
+    case 'toggle-app': toggleAppStatus(el.closest('[data-req]').dataset.req); break;
+    case 'remove-app': removeAppRow(el.closest('[data-req]').dataset.req); break;
+    case 'export': exportJSON(); break;
+    case 'import': document.getElementById('importFile').click(); break;
+  }
+});
+
+document.getElementById('importFile').addEventListener('change', importJSON);
+
+/* =========================================================================
+   BACKUP: DOWNLOAD / RESTORE
    ========================================================================= */
 function exportJSON(){
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const snapshot = { version: 2, exportedAt: new Date().toISOString(), ...state };
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -587,39 +974,93 @@ function exportJSON(){
   URL.revokeObjectURL(url);
 }
 
+function normalizeState(p){
+  if (!p || !Array.isArray(p.tiers)) throw new Error('Not a tracker backup (no tiers)');
+  const out = {
+    settings: { fx: num(p.settings?.fx) || 158 },
+    tiers: p.tiers.map(t => ({
+      id: String(t.id), name: String(t.name || t.id), pillClass: String(t.pillClass || ''),
+      targetQty: int(t.targetQty),
+      issueQty: t.issueQty == null ? null : int(t.issueQty),
+      extraQty: t.extraQty == null ? null : int(t.extraQty),
+      items: (t.items || []).map(i => ({
+        id: String(i.id || uid()), name: String(i.name || ''), chinaCostUSD: num(i.chinaCostUSD), qty: int(i.qty)
+      }))
+    })),
+    // Older backups have no areas/customers — keep what's already here in that case.
+    areas: Array.isArray(p.areas)
+      ? p.areas.map(a => ({ id: String(a.id), name: String(a.name || ''), manager: String(a.manager || '') }))
+      : state.areas,
+    recipients: Array.isArray(p.recipients)
+      ? p.recipients.map(r => ({
+          id: String(r.id || uid()), areaId: String(r.areaId), customer: String(r.customer || ''),
+          salesRep: String(r.salesRep || ''), totalYtd: num(r.totalYtd),
+          tierQty: (r.tierQty && typeof r.tierQty === 'object') ? r.tierQty : {}, notes: String(r.notes || '')
+        }))
+      : state.recipients,
+    appreciation: {
+      targetAllocation: int(p.appreciation?.targetAllocation ?? 1000),
+      defaultQty: int(p.appreciation?.defaultQty ?? 5),
+      requests: (p.appreciation?.requests || []).map(r => ({
+        id: String(r.id || uid()), customer: String(r.customer || ''), date: String(r.date || ''),
+        area: String(r.area || ''), salesAreaId: String(r.salesAreaId || ''), qty: int(r.qty),
+        giftType: String(r.giftType || ''), completed: !!r.completed, notes: String(r.notes || '')
+      }))
+    }
+  };
+  const areaIds = new Set(out.areas.map(a => a.id));
+  out.recipients = out.recipients.filter(r => areaIds.has(r.areaId));
+  out.appreciation.requests.forEach(r => { if (!areaIds.has(r.salesAreaId)) r.salesAreaId = ''; });
+  return out;
+}
+
 function importJSON(event){
   const file = event.target.files[0];
+  event.target.value = '';
   if (!file) return;
   const reader = new FileReader();
   reader.onload = async e => {
+    let next;
     try {
-      const parsed = JSON.parse(e.target.result);
-      state = parsed;
-      document.getElementById('set-fx').value = state.settings.fx;
-      renderAll();
-      await pushAllToSupabase();
-    } catch(err){
+      next = normalizeState(JSON.parse(e.target.result));
+    } catch (err){
       console.error(err);
-      alert('Could not read that file — is it a JSON export from this tracker?');
+      alert('Could not read that file — is it a backup downloaded from this tracker?');
+      return;
     }
+    if (!confirm(`Restore “${file.name}”?\n\nThis REPLACES all tracker data for everyone using this page. Consider downloading a backup of the current data first.`)) return;
+    cancelAllSaves();
+    state = next;
+    renderAll();
+    await run(pushAllToSupabase);
   };
   reader.readAsText(file);
-  event.target.value = '';
-}
-
-function renderAll(){
-  renderTiers();
-  renderAppreciation();
-  if (document.getElementById('tab-summary').classList.contains('active')) renderSummary();
 }
 
 /* =========================================================================
    PERSISTENCE (Supabase)
-   Standalone anon client (see head) against the gift_tracker_* tables.
-   Field edits are debounced per-row; adds/deletes/toggles save immediately.
+   Field edits are debounced per-row and flushed when the field loses focus;
+   adds/deletes/toggles save immediately. Row saves are upserts so an edit
+   landing before its row's insert still sticks.
    ========================================================================= */
 const NO_MATCH_ID = '__none__'; // delete-all filter target; no row will ever have this id
-const saveTimers = {};
+const pending = new Map();
+let inFlight = 0;
+let lastError = null;
+
+const itemDb = (tier, item) => ({
+  id: item.id, tier_id: tier.id, name: item.name,
+  china_cost_usd: num(item.chinaCostUSD), qty: int(item.qty), sort_order: Math.max(0, tier.items.indexOf(item))
+});
+const recipientDb = r => ({
+  id: r.id, area_id: r.areaId, customer: r.customer, sales_rep: r.salesRep,
+  total_ytd: num(r.totalYtd), tier_qty: r.tierQty, notes: r.notes
+});
+const requestDb = r => ({
+  id: r.id, customer: r.customer, request_date: r.date || null, area: r.area,
+  sales_area_id: r.salesAreaId || null, qty: int(r.qty), gift_type: r.giftType,
+  completed: !!r.completed, notes: r.notes
+});
 
 function setSyncStatus(kind, text){
   const el = document.getElementById('syncStatus');
@@ -628,100 +1069,145 @@ function setSyncStatus(kind, text){
   document.getElementById('syncStatusText').textContent = text;
 }
 
-async function saveNow(fn){
-  setSyncStatus('saving', 'Saving…');
+function updateSyncStatus(){
+  if (pending.size || inFlight) setSyncStatus('saving', 'Saving…');
+  else if (lastError) setSyncStatus('error', 'Save failed — check connection');
+  else setSyncStatus('saved', 'All changes saved');
+}
+
+async function run(fn){
+  inFlight++;
+  updateSyncStatus();
   try {
-    const { error } = await fn() || {};
-    if (error) throw error;
-    setSyncStatus('saved', 'All changes saved');
-  } catch(err){
+    const res = await fn();
+    if (res && res.error) throw res.error;
+    lastError = null;
+  } catch (err){
     console.error('Save failed', err);
-    setSyncStatus('error', 'Save failed — check connection');
+    lastError = err;
+  } finally {
+    inFlight--;
+    updateSyncStatus();
   }
 }
 
-function scheduleSave(key, fn, delay = 700){
-  clearTimeout(saveTimers[key]);
-  setSyncStatus('saving', 'Saving…');
-  saveTimers[key] = setTimeout(() => saveNow(fn), delay);
+const saveNow = fn => run(fn);
+
+function scheduleSave(key, fn, delay = 800){
+  cancelSave(key);
+  pending.set(key, { fn, timer: setTimeout(() => { pending.delete(key); run(fn); }, delay) });
+  updateSyncStatus();
 }
 
+function cancelSave(key){
+  const p = pending.get(key);
+  if (!p) return;
+  clearTimeout(p.timer);
+  pending.delete(key);
+  updateSyncStatus();
+}
+
+function cancelAllSaves(){ [...pending.keys()].forEach(cancelSave); }
+
+function flushSaves(){
+  [...pending.entries()].forEach(([key, p]) => {
+    clearTimeout(p.timer);
+    pending.delete(key);
+    run(p.fn);
+  });
+}
+
+window.addEventListener('beforeunload', e => {
+  if (!pending.size && !inFlight) return;
+  flushSaves();
+  e.preventDefault();
+  e.returnValue = '';
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushSaves(); });
+
 async function loadState(){
-  const [settingsRes, tiersRes, itemsRes, appSettingsRes, appReqRes] = await Promise.all([
+  const [settingsRes, tiersRes, itemsRes, areasRes, recipientsRes, appSettingsRes, appReqRes] = await Promise.all([
     sb.from('gift_tracker_settings').select('*').eq('id', 1).maybeSingle(),
     sb.from('gift_tracker_tiers').select('*').order('sort_order'),
     sb.from('gift_tracker_items').select('*').order('sort_order'),
+    sb.from('gift_tracker_areas').select('*').order('sort_order'),
+    sb.from('gift_tracker_recipients').select('*').order('created_at'),
     sb.from('gift_tracker_appreciation_settings').select('*').eq('id', 1).maybeSingle(),
     sb.from('gift_tracker_appreciation_requests').select('*').order('created_at')
   ]);
-  const firstError = settingsRes.error || tiersRes.error || itemsRes.error || appSettingsRes.error || appReqRes.error;
+  const firstError = [settingsRes, tiersRes, itemsRes, areasRes, recipientsRes, appSettingsRes, appReqRes]
+    .map(r => r.error).find(Boolean);
   if (firstError) throw firstError;
 
-  state.settings.fx = Number(settingsRes.data?.fx) || 158;
+  state.settings.fx = num(settingsRes.data?.fx) || 158;
   state.tiers = tiersRes.data.map(t => ({
     id: t.id, name: t.name, pillClass: t.pill_class,
     targetQty: t.target_qty, issueQty: t.issue_qty, extraQty: t.extra_qty,
     items: itemsRes.data.filter(i => i.tier_id === t.id).map(i => ({
-      id: i.id, name: i.name, chinaCostUSD: i.china_cost_usd, qty: i.qty
+      id: i.id, name: i.name, chinaCostUSD: num(i.china_cost_usd), qty: i.qty
     }))
+  }));
+  state.areas = areasRes.data.map(a => ({ id: a.id, name: a.name, manager: a.manager }));
+  state.recipients = recipientsRes.data.map(r => ({
+    id: r.id, areaId: r.area_id, customer: r.customer, salesRep: r.sales_rep,
+    totalYtd: num(r.total_ytd), tierQty: r.tier_qty || {}, notes: r.notes || ''
   }));
   state.appreciation.targetAllocation = appSettingsRes.data?.target_allocation ?? 1000;
   state.appreciation.defaultQty = appSettingsRes.data?.default_qty ?? 5;
   state.appreciation.requests = appReqRes.data.map(r => ({
-    id: r.id, customer: r.customer, date: r.request_date || '', area: r.area,
-    qty: r.qty, giftType: r.gift_type, completed: r.completed, notes: r.notes
+    id: r.id, customer: r.customer, date: r.request_date || '', area: r.area || '',
+    salesAreaId: r.sales_area_id || '', qty: r.qty, giftType: r.gift_type || '',
+    completed: r.completed, notes: r.notes || ''
   }));
 }
 
 async function pushAllToSupabase(){
-  setSyncStatus('saving', 'Saving…');
-  try {
-    await sb.from('gift_tracker_settings').update({ fx: Number(state.settings.fx) || 0, updated_at: new Date().toISOString() }).eq('id', 1);
-    await sb.from('gift_tracker_appreciation_settings').update({
-      target_allocation: Number(state.appreciation.targetAllocation) || 0,
-      default_qty: Number(state.appreciation.defaultQty) || 0,
-      updated_at: new Date().toISOString()
-    }).eq('id', 1);
+  const must = async q => { const { error } = await q; if (error) throw error; };
+  const now = new Date().toISOString();
 
-    for (const tier of state.tiers) {
-      await sb.from('gift_tracker_tiers').update({
-        target_qty: Number(tier.targetQty) || 0,
-        issue_qty: tier.issueQty == null ? null : Number(tier.issueQty),
-        extra_qty: tier.extraQty == null ? null : Number(tier.extraQty)
-      }).eq('id', tier.id);
-    }
+  await must(sb.from('gift_tracker_settings').update({ fx: num(state.settings.fx), updated_at: now }).eq('id', 1));
+  await must(sb.from('gift_tracker_appreciation_settings').update({
+    target_allocation: int(state.appreciation.targetAllocation),
+    default_qty: int(state.appreciation.defaultQty),
+    updated_at: now
+  }).eq('id', 1));
 
-    await sb.from('gift_tracker_items').delete().neq('id', NO_MATCH_ID);
-    const itemRows = [];
-    state.tiers.forEach(tier => tier.items.forEach((item, i) => itemRows.push({
-      id: item.id, tier_id: tier.id, name: item.name,
-      china_cost_usd: Number(item.chinaCostUSD) || 0, qty: Number(item.qty) || 0, sort_order: i
-    })));
-    if (itemRows.length) await sb.from('gift_tracker_items').insert(itemRows);
+  await must(sb.from('gift_tracker_tiers').upsert(state.tiers.map((t, i) => ({
+    id: t.id, name: t.name, pill_class: t.pillClass, sort_order: i,
+    target_qty: int(t.targetQty),
+    issue_qty: t.issueQty == null ? null : int(t.issueQty),
+    extra_qty: t.extraQty == null ? null : int(t.extraQty)
+  }))));
 
-    await sb.from('gift_tracker_appreciation_requests').delete().neq('id', NO_MATCH_ID);
-    const reqRows = state.appreciation.requests.map(r => ({
-      id: r.id, customer: r.customer, request_date: r.date || null, area: r.area,
-      qty: Number(r.qty) || 0, gift_type: r.giftType, completed: !!r.completed, notes: r.notes
-    }));
-    if (reqRows.length) await sb.from('gift_tracker_appreciation_requests').insert(reqRows);
+  await must(sb.from('gift_tracker_items').delete().neq('id', NO_MATCH_ID));
+  const itemRows = state.tiers.flatMap(t => t.items.map(i => itemDb(t, i)));
+  if (itemRows.length) await must(sb.from('gift_tracker_items').insert(itemRows));
 
-    setSyncStatus('saved', 'All changes saved');
-  } catch(err){
-    console.error('Import sync failed', err);
-    setSyncStatus('error', 'Save failed — check connection');
+  if (state.areas.length) {
+    await must(sb.from('gift_tracker_areas').upsert(state.areas.map((a, i) => ({
+      id: a.id, name: a.name, manager: a.manager, sort_order: i
+    }))));
   }
+  await must(sb.from('gift_tracker_recipients').delete().neq('id', NO_MATCH_ID));
+  if (state.recipients.length) await must(sb.from('gift_tracker_recipients').insert(state.recipients.map(recipientDb)));
+
+  await must(sb.from('gift_tracker_appreciation_requests').delete().neq('id', NO_MATCH_ID));
+  const reqRows = state.appreciation.requests.map(requestDb);
+  if (reqRows.length) await must(sb.from('gift_tracker_appreciation_requests').insert(reqRows));
 }
 
 async function init(){
+  loadUi();
   try {
     await loadState();
-    setSyncStatus('saved', 'All changes saved');
-  } catch(err){
-    console.error('Could not load saved data, starting from blank defaults', err);
-    setSyncStatus('error', 'Could not load — working offline');
+    lastError = null;
+    updateSyncStatus();
+  } catch (err){
+    console.error('Could not load saved data', err);
+    setSyncStatus('error', 'Could not load — changes won’t save');
   }
   renderAll();
+  switchTab(ui.tab);
 }
 
 init();
