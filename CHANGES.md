@@ -1,6 +1,6 @@
 # DFL 2026 Gifting Tracker — Notes
 
-Base file: `DFL_2026_Gifting_Tracker.html`. Standalone, unguarded page (same posture as `field-intel.html`): own Supabase client with the anon publishable key, no auth-guard, not linked from nav or `routes.js`.
+Base file: `index.html` (served via GitHub Pages). Standalone, unguarded page (same posture as `field-intel.html`): own Supabase client with the anon publishable key, no auth-guard, not linked from nav or `routes.js`.
 
 ## Storage — done
 
