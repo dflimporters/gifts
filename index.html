@@ -75,6 +75,26 @@
   .field input[readonly]{background:var(--bg);color:var(--text-soft);}
   .field .hint{font-size:10.5px;color:var(--text-faint);margin-top:4px;}
 
+  .sum-bar{padding:16px 18px;}
+  .sum-bar-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
+  .sum-stat .assigned{font-size:11px;font-weight:600;color:var(--text-faint);}
+  .sum-stat.total .assigned{color:rgba(255,255,255,.6);}
+  .sum-stat{padding:10px 14px;border-radius:var(--radius-sm);background:var(--bg);border-left:4px solid var(--blue);}
+  .sum-stat.total{background:var(--navy);border-left-color:var(--navy);color:#fff;}
+  .sum-stat .lbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);}
+  .sum-stat.total .lbl{color:rgba(255,255,255,.65);}
+  .sum-stat .gifts{font-size:20px;font-weight:800;color:var(--navy);line-height:1.2;margin-top:2px;}
+  .sum-stat.total .gifts{color:#fff;}
+  .sum-stat .gifts small{font-size:11px;font-weight:600;color:var(--text-faint);}
+  .sum-stat.total .gifts small{color:rgba(255,255,255,.6);}
+  .sum-stat .cost{font-size:12.5px;font-weight:700;color:var(--blue);margin-top:1px;}
+  .sum-stat.total .cost{color:#93c5fd;}
+  .fx-bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
+  .fx-bar label{font-size:11.5px;font-weight:700;color:var(--text-soft);}
+  .fx-bar input{width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;background:#fbfcfe;color:var(--text);}
+  .fx-bar input:focus{outline:2px solid var(--blue);outline-offset:-1px;background:#fff;}
+  .fx-bar span{font-size:11.5px;color:var(--text-faint);}
+
   /* ---- tier header ---- */
   .tier-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:16px;}
   .tier-title{display:flex;align-items:center;gap:10px;}
@@ -134,6 +154,11 @@
   .matrix td{padding:9px 8px;}
 
   /* ---- summary ---- */
+  .sum-table{min-width:620px;}
+  .sum-table td, .sum-table th{text-align:right;white-space:nowrap;padding:10px 12px;}
+  .sum-table td:first-child, .sum-table th:first-child{text-align:left;}
+  .sum-table tfoot td{font-size:13.5px;}
+  .muted{color:var(--text-faint);font-weight:500;}
   .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px;}
   .summary-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 1px 3px rgba(15,32,68,.04);}
   .summary-card .eyebrow{margin-bottom:8px;}
@@ -201,15 +226,12 @@
 
   <!-- ============ TAB: TIERS & COSTING ============ -->
   <section class="tab-panel active" id="tab-tiers">
-    <div class="card">
-      <p class="eyebrow">Landed Cost Settings</p>
-      <h2>Default landed-cost assumptions</h2>
-      <p class="subtitle">Landed cost = China unit cost (USD) × 1.5 markup × exchange rate, converted to JMD.</p>
-      <div class="settings-grid">
-        <div class="field">
-          <label for="set-fx">Exchange rate (USD → JMD)</label>
-          <input type="text" class="num-input" inputmode="decimal" autocomplete="off" id="set-fx" data-kind="fx" data-num="decimal">
-        </div>
+    <div class="card sum-bar">
+      <div class="sum-bar-stats" id="tier-summary"></div>
+      <div class="fx-bar">
+        <label for="set-fx">USD → JMD</label>
+        <input type="text" class="num-input" inputmode="decimal" autocomplete="off" id="set-fx" data-kind="fx" data-num="decimal">
+        <span>Landed = China cost × 1.5 × rate</span>
       </div>
     </div>
     <div id="tiers-container"></div>
@@ -275,6 +297,12 @@
 
   <!-- ============ TAB: SUMMARY ============ -->
   <section class="tab-panel" id="tab-summary">
+    <div class="card">
+      <p class="eyebrow">Overview</p>
+      <h2>Gifts &amp; costs by class</h2>
+      <p class="subtitle">Est. total cost = order qty × landed cost for each item in the class (from Tiers &amp; Costing).</p>
+      <div class="table-wrap" id="summary-table"></div>
+    </div>
     <div class="summary-grid" id="summary-cards"></div>
     <div class="card">
       <p class="eyebrow">Breakdown</p>
@@ -449,7 +477,26 @@ function renderTierCard(tier){
     </div>`;
 }
 
+const TIER_COLORS = { Platinum: '#5b6472', Gold: '#c8922a', Silver: '#8b96a4' };
+
+function renderTierSummary(){
+  const stat = (label, gifts, cost, assigned, cls, color) => `
+    <div class="sum-stat ${cls}" ${color ? `style="border-left-color:${color}"` : ''}>
+      <div class="lbl">${esc(label)}</div>
+      <div class="gifts">${fmtNum(gifts)} <small>gifts</small></div>
+      <div class="cost">${fmtJMD(cost)}</div>
+      <div class="assigned">${fmtNum(assigned)} assigned</div>
+    </div>`;
+  const gifts = state.tiers.reduce((s, t) => s + int(t.targetQty), 0);
+  const cost = state.tiers.reduce((s, t) => s + tierOrderTotal(t), 0);
+  const assigned = state.tiers.reduce((s, t) => s + giftCount(state.recipients, t.id), 0);
+  document.getElementById('tier-summary').innerHTML =
+    stat('Total', gifts, cost, assigned, 'total') +
+    state.tiers.map(t => stat(t.name, int(t.targetQty), tierOrderTotal(t), giftCount(state.recipients, t.id), '', TIER_COLORS[t.name])).join('');
+}
+
 function refreshTierCalcs(){
+  renderTierSummary();
   document.querySelectorAll('#tiers-container [data-tier]').forEach(card => {
     const tier = tierById(card.dataset.tier);
     if (!tier) return;
@@ -774,6 +821,48 @@ function renderSummary(){
   const assigned = state.tiers.reduce((s, t) => s + giftCount(state.recipients, t.id), 0);
   const goal = state.tiers.reduce((s, t) => s + tierGoal(t), 0);
   const appQty = state.appreciation.requests.reduce((s, r) => s + int(r.qty), 0);
+  const appTarget = int(state.appreciation.targetAllocation);
+  const targetAll = state.tiers.reduce((s, t) => s + int(t.targetQty), 0);
+  const leftCell = n => `<td class="${n < 0 ? 'over' : ''}">${n < 0 ? 'Over by ' + fmtNum(-n) : fmtNum(n)}</td>`;
+
+  document.getElementById('summary-table').innerHTML = `
+    <table class="sum-table">
+      <thead>
+        <tr><th>Class</th><th>Total Gifts</th><th>Assigned to Customers</th><th>Left to Assign</th><th>Cost per Gift</th><th>Est. Total Cost</th></tr>
+      </thead>
+      <tbody>
+        ${state.tiers.map(t => {
+          const a = giftCount(state.recipients, t.id);
+          return `
+          <tr>
+            <td><strong>${esc(t.name)}</strong></td>
+            <td>${fmtNum(int(t.targetQty))}</td>
+            <td>${fmtNum(a)}</td>
+            ${leftCell(tierGoal(t) - a)}
+            <td>${fmtJMD(tierGiftCost(t))}</td>
+            <td>${fmtJMD(tierOrderTotal(t))}</td>
+          </tr>`;
+        }).join('')}
+        <tr>
+          <td><strong>Customer Appreciation</strong> <span class="muted">(bags)</span></td>
+          <td>${fmtNum(appTarget)}</td>
+          <td>${fmtNum(appQty)}</td>
+          ${leftCell(appTarget - appQty)}
+          <td class="muted">—</td>
+          <td class="muted">—</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td>
+          <td>${fmtNum(targetAll + appTarget)}</td>
+          <td>${fmtNum(assigned + appQty)}</td>
+          ${leftCell(goal - assigned + appTarget - appQty)}
+          <td></td>
+          <td>${fmtJMD(orderTotal)}</td>
+        </tr>
+      </tfoot>
+    </table>`;
 
   document.getElementById('summary-cards').innerHTML = `
     <div class="summary-card">
@@ -802,9 +891,8 @@ function renderSummary(){
       <div class="sub">total spend, last year's costing tab</div>
     </div>`;
 
-  const tierColors = { Platinum: '#5b6472', Gold: '#c8922a', Silver: '#8b96a4', Bronze: '#9a5f34' };
   document.getElementById('summary-bars').innerHTML =
-    bars(state.tiers.map(t => ({ label: t.name, value: tierOrderTotal(t) })), r => tierColors[r.label] || '#2563eb');
+    bars(state.tiers.map(t => ({ label: t.name, value: tierOrderTotal(t) })), r => TIER_COLORS[r.label] || '#2563eb');
   document.getElementById('summary-area-bars').innerHTML =
     bars(state.areas.map(a => ({ label: a.name || 'Unnamed', value: recipientsCost(recipientsIn(a.id)) })), () => '#2563eb');
 }
