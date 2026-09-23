@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Customer Gifting Tracker — DFL Importers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Standalone, no login — own client instance, matches field-intel.html's pattern.
+  const sb = window.supabase.createClient(
+    'https://hzagwndglwhcepsirafi.supabase.co',
+    'sb_publishable_5rAinfDT1K9kwEQnqYwlOA_-C5tk_6h'
+  );
+</script>
+<style>
+  :root{
+    --navy:#0f2044; --navy-deep:#0a1730;
+    --blue:#2563eb; --blue-bg:#eff6ff;
+    --bg:#f0f4f8; --card:#ffffff;
+    --line:rgba(15,32,68,0.08);
+    --text:#1e293b; --text-soft:#55677a; --text-faint:#8b99a6;
+    --radius:16px; --radius-sm:10px;
+    --green:#16a34a; --green-bg:#f0fdf4;
+    --amber:#d97706; --amber-bg:#fffbeb;
+    --red:#dc2626;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,sans-serif; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 20px 60px;}
+
+  /* ---- header ---- */
+  header.hero{
+    position:relative; padding:28px 0 26px; color:#fff; overflow:hidden; margin-bottom:24px;
+    background:
+      radial-gradient(circle at 90% 6%, rgba(255,255,255,0.14), transparent 42%),
+      linear-gradient(155deg, rgba(15,32,68,.97) 0%, rgba(10,23,48,.97) 100%);
+  }
+  header.hero::before{content:"";position:absolute;inset:0;opacity:.4;background-image:radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px);background-size:16px 16px;pointer-events:none;}
+  .hero-inner{position:relative;z-index:2;max-width:1140px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+  .brandmark{display:flex;align-items:center;gap:12px;}
+  .brandmark .logo-badge{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;letter-spacing:.02em;}
+  .brandmark h1{font-size:19px;margin:0;font-weight:800;line-height:1.2;}
+  .brandmark p{margin:2px 0 0;font-size:12.5px;color:rgba(255,255,255,.6);font-weight:500;}
+  .hero-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .ghost-btn{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:100px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);color:#fff;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;}
+  .ghost-btn:hover{background:rgba(255,255,255,.18);}
+  .ghost-btn svg{width:14px;height:14px;}
+
+  .sync-status{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:100px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.75);font-weight:700;font-size:12px;}
+  .sync-status .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+  .sync-status.saving .dot{background:var(--amber);}
+  .sync-status.error .dot{background:var(--red);}
+  .sync-status.error{color:#fecaca;}
+
+  /* ---- tabs ---- */
+  .tabs{display:flex;gap:6px;margin-bottom:22px;background:var(--card);border:1px solid var(--line);border-radius:100px;padding:5px;width:fit-content;box-shadow:0 1px 2px rgba(15,32,68,.04);}
+  .tab-btn{padding:9px 18px;border-radius:100px;border:none;background:transparent;font-family:inherit;font-weight:700;font-size:13px;color:var(--text-soft);cursor:pointer;}
+  .tab-btn.active{background:var(--navy);color:#fff;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* ---- cards ---- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:20px;box-shadow:0 1px 3px rgba(15,32,68,.04);}
+  .card h2{font-size:15px;margin:0 0 4px;font-weight:800;color:var(--navy);}
+  .card .subtitle{font-size:12.5px;color:var(--text-soft);margin:0 0 16px;}
+  .eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin:0 0 6px;}
+
+  /* ---- settings grid ---- */
+  .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
+  .field label{display:block;font-size:11.5px;font-weight:700;color:var(--text-soft);margin-bottom:5px;}
+  .field input, .field select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:#fbfcfe;color:var(--text);}
+  .field input:focus, .field select:focus{outline:2px solid var(--blue);outline-offset:-1px;background:#fff;}
+  .field .hint{font-size:10.5px;color:var(--text-faint);margin-top:4px;}
+
+  /* ---- tier header ---- */
+  .tier-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:16px;}
+  .tier-title{display:flex;align-items:center;gap:10px;}
+  .tier-pill{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;}
+  .pill-platinum{background:linear-gradient(135deg,#8b96a8,#5b6472);}
+  .pill-gold{background:linear-gradient(135deg,#e8b34a,#c8922a);}
+  .pill-silver{background:linear-gradient(135deg,#b9c2cc,#8b96a4);}
+  .tier-title h2{margin:0;}
+  .tier-stats{display:flex;gap:18px;flex-wrap:wrap;}
+  .stat{text-align:right;}
+  .stat .num{font-size:17px;font-weight:800;color:var(--navy);display:block;line-height:1.2;}
+  .stat .lbl{font-size:10.5px;color:var(--text-faint);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+
+  .qty-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .qty-inline .field{width:120px;}
+  .qty-note{font-size:11.5px;color:var(--text-faint);}
+
+  /* ---- table ---- */
+  .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-sm);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px;}
+  thead th{background:var(--blue-bg);color:var(--navy);font-weight:800;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;padding:10px 8px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);}
+  tbody td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#fafbfd;}
+  table input{width:100%;min-width:70px;padding:6px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:12.5px;background:#fbfcfe;}
+  table input:focus{outline:2px solid var(--blue);outline-offset:-1px;background:#fff;}
+  .col-name input{min-width:130px;}
+  .num-cell{text-align:right;font-variant-numeric:tabular-nums;}
+  .landed-cell{font-weight:700;color:var(--navy);white-space:nowrap;}
+  .line-total-cell{font-weight:800;color:var(--blue);white-space:nowrap;}
+  .row-remove{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:15px;padding:4px 6px;border-radius:6px;}
+  .row-remove:hover{color:var(--red);background:#fef2f2;}
+
+  .add-row-btn{margin-top:12px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:100px;border:1px dashed var(--blue);background:var(--blue-bg);color:var(--blue);font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;}
+  .add-row-btn:hover{background:#dbeafe;}
+
+  .tier-footer{display:flex;justify-content:flex-end;gap:26px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);flex-wrap:wrap;}
+  .tier-footer .stat{text-align:right;}
+
+  /* ---- summary ---- */
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:20px;}
+  .summary-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 1px 3px rgba(15,32,68,.04);}
+  .summary-card .eyebrow{margin-bottom:8px;}
+  .summary-card .big{font-size:26px;font-weight:800;color:var(--navy);line-height:1.15;}
+  .summary-card .sub{font-size:11.5px;color:var(--text-soft);margin-top:4px;}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .bar-label{width:82px;font-size:12px;font-weight:700;color:var(--text-soft);flex-shrink:0;}
+  .bar-track{flex:1;height:10px;background:var(--bg);border-radius:100px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:100px;}
+  .bar-value{width:120px;text-align:right;font-size:12px;font-weight:700;color:var(--navy);flex-shrink:0;}
+
+  /* ---- appreciation ---- */
+  .appreciation-controls{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;}
+  .appreciation-controls .field{width:180px;}
+  .status-toggle{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:100px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid transparent;}
+  .status-sent{background:var(--green-bg);color:var(--green);border-color:rgba(22,163,74,.25);}
+  .status-pending{background:var(--amber-bg);color:var(--amber);border-color:rgba(217,119,6,.25);}
+  .status-toggle svg{width:12px;height:12px;}
+
+  footer{padding:26px 0;text-align:center;}
+  footer p{font-size:11px;color:var(--text-faint);margin:0;}
+
+  @media (max-width:640px){
+    .hero-inner{flex-direction:column;align-items:flex-start;}
+    .tier-stats{width:100%;justify-content:space-between;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="brandmark">
+      <div class="logo-badge">DFL</div>
+      <div>
+        <h1>2026 Customer Gifting Tracker</h1>
+        <p>China-sourced tiered gifts &amp; local customer appreciation bags</p>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <div class="sync-status" id="syncStatus"><span class="dot"></span><span id="syncStatusText">Loading…</span></div>
+      <button class="ghost-btn" onclick="exportJSON()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0-4-4m4 4 4-4M5 21h14"/></svg>
+        Export data
+      </button>
+      <button class="ghost-btn" onclick="document.getElementById('importFile').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21V8m0 0 4 4m-4-4-4 4M5 3h14"/></svg>
+        Import data
+      </button>
+      <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJSON(event)">
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tiers" onclick="switchTab('tiers')">Tiers &amp; Costing</button>
+    <button class="tab-btn" data-tab="appreciation" onclick="switchTab('appreciation')">Customer Appreciation</button>
+    <button class="tab-btn" data-tab="summary" onclick="switchTab('summary')">Summary</button>
+  </div>
+
+  <!-- ============ TAB: TIERS & COSTING ============ -->
+  <section class="tab-panel active" id="tab-tiers">
+
+    <div class="card">
+      <p class="eyebrow">Landed Cost Settings</p>
+      <h2>Default landed-cost assumptions</h2>
+      <p class="subtitle">Landed cost = China unit cost (USD) × 1.5 markup × exchange rate, converted to JMD.</p>
+      <div class="settings-grid">
+        <div class="field">
+          <label>Exchange rate (USD → JMD)</label>
+          <input type="number" id="set-fx" value="158" step="0.5" oninput="updateSettings()">
+        </div>
+      </div>
+    </div>
+
+    <div id="tiers-container"></div>
+
+  </section>
+
+  <!-- ============ TAB: CUSTOMER APPRECIATION ============ -->
+  <section class="tab-panel" id="tab-appreciation">
+    <div class="card">
+      <p class="eyebrow">Local Gift Bags</p>
+      <h2>Customer Appreciation requests</h2>
+      <p class="subtitle">Separate from the tiered gifts above — locally-assembled bags given out (typically 5 at a time) to stores that request them for their own end-of-year customer appreciation.</p>
+
+      <div class="appreciation-controls">
+        <div class="field">
+          <label>Target allocation (bags)</label>
+          <input type="number" id="app-target" value="1000" oninput="updateAppreciationSettings()">
+        </div>
+        <div class="field">
+          <label>Default qty per request</label>
+          <input type="number" id="app-default-qty" value="5" oninput="updateAppreciationSettings()">
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Area</th>
+              <th>Qty</th>
+              <th>Gift Type</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="appreciation-tbody"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addAppreciationRow()">+ Add request</button>
+
+      <div class="tier-footer">
+        <div class="stat"><span class="num" id="app-total-requests">0</span><span class="lbl">Requests</span></div>
+        <div class="stat"><span class="num" id="app-total-qty">0</span><span class="lbl">Bags Requested</span></div>
+        <div class="stat"><span class="num" id="app-remaining">0</span><span class="lbl">Remaining vs Target</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB: SUMMARY ============ -->
+  <section class="tab-panel" id="tab-summary">
+    <div class="summary-grid" id="summary-cards"></div>
+
+    <div class="card">
+      <p class="eyebrow">Breakdown</p>
+      <h2>Landed cost by tier (JMD)</h2>
+      <div id="summary-bars" style="margin-top:16px;"></div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>DFL Importers — 2026 Gifting Tracker · Draft v1 · Changes save automatically. Use Export/Import for a manual backup or to restore a snapshot.</p>
+</footer>
+
+<script>
+/* =========================================================================
+   STATE
+   Loaded from / persisted to Supabase (gift_tracker_* tables) — see loadState()
+   and the save*() functions below. Export/Import JSON remain as a manual
+   backup/restore option on top of that.
+   ========================================================================= */
+let state = {
+  settings: { fx: 158 },
+  tiers: [],
+  appreciation: { targetAllocation: 1000, defaultQty: 5, requests: [] }
+};
+
+const MARKUP = 1.5; // baked-in China->landed markup, not user-editable
+
+function blankItem(name){
+  return { id: uid(), name: name || '', chinaCostUSD: 0, qty: 0 };
+}
+
+function uid(){ return 'id_' + Math.random().toString(36).slice(2,10); }
+
+/* =========================================================================
+   LANDED COST CALC
+   Landed (JMD) = China unit cost (USD) x 1.5 markup x exchange rate
+   ========================================================================= */
+function calcLanded(item){
+  const landedJMD = (Number(item.chinaCostUSD) || 0) * MARKUP * (Number(state.settings.fx) || 0);
+  const lineTotalJMD = landedJMD * (Number(item.qty) || 0);
+  return { landedJMD, lineTotalJMD };
+}
+
+function fmtUSD(n){ return '$' + (n||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtJMD(n){ return 'J$' + Math.round(n||0).toLocaleString('en-US'); }
+function fmtNum(n){ return (n||0).toLocaleString('en-US'); }
+
+/* =========================================================================
+   RENDER: TIERS
+   ========================================================================= */
+function renderTiers(){
+  const container = document.getElementById('tiers-container');
+  container.innerHTML = state.tiers.map(tier => renderTierCard(tier)).join('');
+}
+
+function renderTierCard(tier){
+  let totalQty = 0, totalLandedJMD = 0;
+  const rows = tier.items.map(item => {
+    const c = calcLanded(item);
+    totalQty += Number(item.qty) || 0;
+    totalLandedJMD += c.lineTotalJMD;
+    return `
+      <tr data-tier="${tier.id}" data-item="${item.id}">
+        <td class="col-name"><input type="text" value="${escapeAttr(item.name)}" oninput="updateItem('${tier.id}','${item.id}','name',this.value)" placeholder="Item name"></td>
+        <td><input type="number" step="0.01" value="${item.chinaCostUSD}" oninput="updateItem('${tier.id}','${item.id}','chinaCostUSD',this.value)"></td>
+        <td class="num-cell landed-cell">${fmtJMD(c.landedJMD)}</td>
+        <td><input type="number" step="1" value="${item.qty}" oninput="updateItem('${tier.id}','${item.id}','qty',this.value)"></td>
+        <td class="num-cell line-total-cell">${fmtJMD(c.lineTotalJMD)}</td>
+        <td><button class="row-remove" onclick="removeItem('${tier.id}','${item.id}')" title="Remove item">&times;</button></td>
+      </tr>`;
+  }).join('');
+
+  const qtyExtra = tier.issueQty != null ? `
+      <div class="field">
+        <label>Issue qty</label>
+        <input type="number" value="${tier.issueQty}" oninput="updateTier('${tier.id}','issueQty',this.value)">
+      </div>
+      <div class="field">
+        <label>Extra / buffer</label>
+        <input type="number" value="${tier.extraQty}" oninput="updateTier('${tier.id}','extraQty',this.value)">
+      </div>` : '';
+
+  return `
+    <div class="card">
+      <div class="tier-head">
+        <div class="tier-title">
+          <div class="tier-pill ${tier.pillClass}">${tier.name.slice(0,2).toUpperCase()}</div>
+          <h2>${tier.name}</h2>
+        </div>
+        <div class="tier-stats">
+          <div class="stat"><span class="num">${fmtNum(tier.targetQty)}</span><span class="lbl">Target Units</span></div>
+          <div class="stat"><span class="num">${fmtNum(totalQty)}</span><span class="lbl">Qty Entered</span></div>
+        </div>
+      </div>
+
+      <div class="qty-inline">
+        <div class="field">
+          <label>Target qty (tier)</label>
+          <input type="number" value="${tier.targetQty}" oninput="updateTier('${tier.id}','targetQty',this.value)">
+        </div>
+        ${qtyExtra}
+        <span class="qty-note">${tier.issueQty != null ? `${fmtNum(tier.issueQty)} to issue + ${fmtNum(tier.extraQty)} extra = ${fmtNum((Number(tier.issueQty)||0)+(Number(tier.extraQty)||0))} target` : ''}</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>China Cost (USD)</th>
+              <th>Landed Cost/unit (JMD)</th>
+              <th>Qty</th>
+              <th>Line Total (JMD)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addItem('${tier.id}')">+ Add item</button>
+
+      <div class="tier-footer">
+        <div class="stat"><span class="num">${fmtNum(totalQty)}</span><span class="lbl">Total Units (items)</span></div>
+        <div class="stat"><span class="num">${fmtJMD(totalLandedJMD)}</span><span class="lbl">Est. Landed Total</span></div>
+      </div>
+    </div>`;
+}
+
+function escapeAttr(s){ return String(s ?? '').replace(/"/g,'&quot;'); }
+
+function updateSettings(){
+  state.settings.fx = document.getElementById('set-fx').value;
+  renderAll();
+  scheduleSave('settings', () => sb.from('gift_tracker_settings').update({
+    fx: Number(state.settings.fx) || 0, updated_at: new Date().toISOString()
+  }).eq('id', 1));
+}
+
+function updateTier(tierId, field, value){
+  const tier = state.tiers.find(t => t.id === tierId);
+  tier[field] = value === '' ? 0 : Number(value);
+  renderAll();
+  scheduleSave('tier:' + tierId, () => sb.from('gift_tracker_tiers').update({
+    target_qty: Number(tier.targetQty) || 0,
+    issue_qty: tier.issueQty == null ? null : Number(tier.issueQty),
+    extra_qty: tier.extraQty == null ? null : Number(tier.extraQty)
+  }).eq('id', tierId));
+}
+
+function updateItem(tierId, itemId, field, value){
+  const tier = state.tiers.find(t => t.id === tierId);
+  const item = tier.items.find(i => i.id === itemId);
+  if (field === 'name') {
+    item.name = value;
+  } else {
+    item[field] = value === '' ? 0 : Number(value);
+  }
+  renderAll();
+  scheduleSave('item:' + itemId, () => sb.from('gift_tracker_items').update({
+    name: item.name, china_cost_usd: Number(item.chinaCostUSD) || 0, qty: Number(item.qty) || 0
+  }).eq('id', itemId));
+}
+
+function addItem(tierId){
+  const tier = state.tiers.find(t => t.id === tierId);
+  const item = blankItem('');
+  tier.items.push(item);
+  renderAll();
+  saveNow(() => sb.from('gift_tracker_items').insert({
+    id: item.id, tier_id: tierId, name: item.name, china_cost_usd: item.chinaCostUSD, qty: item.qty, sort_order: tier.items.length - 1
+  }));
+}
+
+function removeItem(tierId, itemId){
+  const tier = state.tiers.find(t => t.id === tierId);
+  tier.items = tier.items.filter(i => i.id !== itemId);
+  let replacement = null;
+  if (tier.items.length === 0) {
+    replacement = blankItem('');
+    tier.items.push(replacement);
+  }
+  renderAll();
+  saveNow(async () => {
+    await sb.from('gift_tracker_items').delete().eq('id', itemId);
+    if (replacement) {
+      await sb.from('gift_tracker_items').insert({
+        id: replacement.id, tier_id: tierId, name: replacement.name, china_cost_usd: replacement.chinaCostUSD, qty: replacement.qty, sort_order: 0
+      });
+    }
+  });
+}
+
+/* =========================================================================
+   RENDER: CUSTOMER APPRECIATION
+   ========================================================================= */
+function renderAppreciation(){
+  document.getElementById('app-target').value = state.appreciation.targetAllocation;
+  document.getElementById('app-default-qty').value = state.appreciation.defaultQty;
+
+  const tbody = document.getElementById('appreciation-tbody');
+  tbody.innerHTML = state.appreciation.requests.map(req => `
+    <tr data-req="${req.id}">
+      <td><input type="text" value="${escapeAttr(req.customer)}" oninput="updateAppRow('${req.id}','customer',this.value)" placeholder="Customer name"></td>
+      <td><input type="date" value="${req.date || ''}" oninput="updateAppRow('${req.id}','date',this.value)"></td>
+      <td><input type="text" value="${escapeAttr(req.area)}" oninput="updateAppRow('${req.id}','area',this.value)" placeholder="Area"></td>
+      <td><input type="number" value="${req.qty}" oninput="updateAppRow('${req.id}','qty',this.value)"></td>
+      <td><input type="text" value="${escapeAttr(req.giftType)}" oninput="updateAppRow('${req.id}','giftType',this.value)" placeholder="Gift Bag"></td>
+      <td>
+        <span class="status-toggle ${req.completed ? 'status-sent' : 'status-pending'}" onclick="toggleAppStatus('${req.id}')">
+          ${req.completed
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Sent'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="9"/></svg> Pending'}
+        </span>
+      </td>
+      <td><input type="text" value="${escapeAttr(req.notes)}" oninput="updateAppRow('${req.id}','notes',this.value)" placeholder="Notes"></td>
+      <td><button class="row-remove" onclick="removeAppRow('${req.id}')" title="Remove">&times;</button></td>
+    </tr>`).join('');
+
+  const totalRequests = state.appreciation.requests.length;
+  const totalQty = state.appreciation.requests.reduce((sum, r) => sum + (Number(r.qty) || 0), 0);
+  document.getElementById('app-total-requests').textContent = fmtNum(totalRequests);
+  document.getElementById('app-total-qty').textContent = fmtNum(totalQty);
+  document.getElementById('app-remaining').textContent = fmtNum((Number(state.appreciation.targetAllocation) || 0) - totalQty);
+}
+
+function updateAppreciationSettings(){
+  state.appreciation.targetAllocation = Number(document.getElementById('app-target').value) || 0;
+  state.appreciation.defaultQty = Number(document.getElementById('app-default-qty').value) || 0;
+  renderAppreciation();
+  scheduleSave('appSettings', () => sb.from('gift_tracker_appreciation_settings').update({
+    target_allocation: state.appreciation.targetAllocation,
+    default_qty: state.appreciation.defaultQty,
+    updated_at: new Date().toISOString()
+  }).eq('id', 1));
+}
+
+function addAppreciationRow(){
+  const req = {
+    id: uid(), customer: '', date: '', area: '',
+    qty: state.appreciation.defaultQty, giftType: 'Gift Bag',
+    completed: false, notes: ''
+  };
+  state.appreciation.requests.push(req);
+  renderAppreciation();
+  saveNow(() => sb.from('gift_tracker_appreciation_requests').insert({
+    id: req.id, customer: req.customer, request_date: null, area: req.area,
+    qty: req.qty, gift_type: req.giftType, completed: req.completed, notes: req.notes
+  }));
+}
+
+function updateAppRow(id, field, value){
+  const req = state.appreciation.requests.find(r => r.id === id);
+  req[field] = (field === 'qty') ? (Number(value) || 0) : value;
+  renderAppreciation();
+  scheduleSave('appReq:' + id, () => sb.from('gift_tracker_appreciation_requests').update({
+    customer: req.customer, request_date: req.date || null, area: req.area,
+    qty: Number(req.qty) || 0, gift_type: req.giftType, notes: req.notes
+  }).eq('id', id));
+}
+
+function toggleAppStatus(id){
+  const req = state.appreciation.requests.find(r => r.id === id);
+  req.completed = !req.completed;
+  renderAppreciation();
+  saveNow(() => sb.from('gift_tracker_appreciation_requests').update({ completed: req.completed }).eq('id', id));
+}
+
+function removeAppRow(id){
+  state.appreciation.requests = state.appreciation.requests.filter(r => r.id !== id);
+  renderAppreciation();
+  saveNow(() => sb.from('gift_tracker_appreciation_requests').delete().eq('id', id));
+}
+
+/* =========================================================================
+   RENDER: SUMMARY
+   ========================================================================= */
+function renderSummary(){
+  const tierTotals = state.tiers.map(tier => {
+    const qty = tier.items.reduce((s,i) => s + (Number(i.qty)||0), 0);
+    const landed = tier.items.reduce((s,i) => s + calcLanded(i).lineTotalJMD, 0);
+    return { name: tier.name, qty, landed };
+  });
+  const grandTotalJMD = tierTotals.reduce((s,t) => s + t.landed, 0);
+  const grandTotalQty = tierTotals.reduce((s,t) => s + t.qty, 0);
+  const appQty = state.appreciation.requests.reduce((s,r) => s + (Number(r.qty)||0), 0);
+
+  const cards = document.getElementById('summary-cards');
+  cards.innerHTML = `
+    <div class="summary-card">
+      <p class="eyebrow">Tiered Gifts</p>
+      <div class="big">${fmtNum(grandTotalQty)}</div>
+      <div class="sub">units across Platinum / Gold / Silver</div>
+    </div>
+    <div class="summary-card">
+      <p class="eyebrow">Est. Landed Budget</p>
+      <div class="big">${fmtJMD(grandTotalJMD)}</div>
+      <div class="sub">tiered gifts only, China → Jamaica</div>
+    </div>
+    <div class="summary-card">
+      <p class="eyebrow">Customer Appreciation</p>
+      <div class="big">${fmtNum(appQty)}</div>
+      <div class="sub">of ${fmtNum(state.appreciation.targetAllocation)} bags target</div>
+    </div>
+    <div class="summary-card">
+      <p class="eyebrow">2025 Reference</p>
+      <div class="big">J$3,464,368</div>
+      <div class="sub">total spend, last year's costing tab</div>
+    </div>`;
+
+  const maxLanded = Math.max(...tierTotals.map(t => t.landed), 1);
+  const colors = {'Platinum':'#5b6472','Gold':'#c8922a','Silver':'#8b96a4'};
+  document.getElementById('summary-bars').innerHTML = tierTotals.map(t => `
+    <div class="bar-row">
+      <div class="bar-label">${t.name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(t.landed/maxLanded*100).toFixed(1)}%; background:${colors[t.name]||'#2563eb'};"></div></div>
+      <div class="bar-value">${fmtJMD(t.landed)}</div>
+    </div>`).join('');
+}
+
+/* =========================================================================
+   TABS
+   ========================================================================= */
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'summary') renderSummary();
+}
+
+/* =========================================================================
+   EXPORT / IMPORT (manual persistence for this draft)
+   ========================================================================= */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'dfl-gifting-tracker-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(event){
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      state = parsed;
+      document.getElementById('set-fx').value = state.settings.fx;
+      renderAll();
+      await pushAllToSupabase();
+    } catch(err){
+      console.error(err);
+      alert('Could not read that file — is it a JSON export from this tracker?');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function renderAll(){
+  renderTiers();
+  renderAppreciation();
+  if (document.getElementById('tab-summary').classList.contains('active')) renderSummary();
+}
+
+/* =========================================================================
+   PERSISTENCE (Supabase)
+   Standalone anon client (see head) against the gift_tracker_* tables.
+   Field edits are debounced per-row; adds/deletes/toggles save immediately.
+   ========================================================================= */
+const NO_MATCH_ID = '__none__'; // delete-all filter target; no row will ever have this id
+const saveTimers = {};
+
+function setSyncStatus(kind, text){
+  const el = document.getElementById('syncStatus');
+  el.classList.remove('saving', 'error');
+  if (kind !== 'saved') el.classList.add(kind);
+  document.getElementById('syncStatusText').textContent = text;
+}
+
+async function saveNow(fn){
+  setSyncStatus('saving', 'Saving…');
+  try {
+    const { error } = await fn() || {};
+    if (error) throw error;
+    setSyncStatus('saved', 'All changes saved');
+  } catch(err){
+    console.error('Save failed', err);
+    setSyncStatus('error', 'Save failed — check connection');
+  }
+}
+
+function scheduleSave(key, fn, delay = 700){
+  clearTimeout(saveTimers[key]);
+  setSyncStatus('saving', 'Saving…');
+  saveTimers[key] = setTimeout(() => saveNow(fn), delay);
+}
+
+async function loadState(){
+  const [settingsRes, tiersRes, itemsRes, appSettingsRes, appReqRes] = await Promise.all([
+    sb.from('gift_tracker_settings').select('*').eq('id', 1).maybeSingle(),
+    sb.from('gift_tracker_tiers').select('*').order('sort_order'),
+    sb.from('gift_tracker_items').select('*').order('sort_order'),
+    sb.from('gift_tracker_appreciation_settings').select('*').eq('id', 1).maybeSingle(),
+    sb.from('gift_tracker_appreciation_requests').select('*').order('created_at')
+  ]);
+  const firstError = settingsRes.error || tiersRes.error || itemsRes.error || appSettingsRes.error || appReqRes.error;
+  if (firstError) throw firstError;
+
+  state.settings.fx = Number(settingsRes.data?.fx) || 158;
+  state.tiers = tiersRes.data.map(t => ({
+    id: t.id, name: t.name, pillClass: t.pill_class,
+    targetQty: t.target_qty, issueQty: t.issue_qty, extraQty: t.extra_qty,
+    items: itemsRes.data.filter(i => i.tier_id === t.id).map(i => ({
+      id: i.id, name: i.name, chinaCostUSD: i.china_cost_usd, qty: i.qty
+    }))
+  }));
+  state.appreciation.targetAllocation = appSettingsRes.data?.target_allocation ?? 1000;
+  state.appreciation.defaultQty = appSettingsRes.data?.default_qty ?? 5;
+  state.appreciation.requests = appReqRes.data.map(r => ({
+    id: r.id, customer: r.customer, date: r.request_date || '', area: r.area,
+    qty: r.qty, giftType: r.gift_type, completed: r.completed, notes: r.notes
+  }));
+}
+
+async function pushAllToSupabase(){
+  setSyncStatus('saving', 'Saving…');
+  try {
+    await sb.from('gift_tracker_settings').update({ fx: Number(state.settings.fx) || 0, updated_at: new Date().toISOString() }).eq('id', 1);
+    await sb.from('gift_tracker_appreciation_settings').update({
+      target_allocation: Number(state.appreciation.targetAllocation) || 0,
+      default_qty: Number(state.appreciation.defaultQty) || 0,
+      updated_at: new Date().toISOString()
+    }).eq('id', 1);
+
+    for (const tier of state.tiers) {
+      await sb.from('gift_tracker_tiers').update({
+        target_qty: Number(tier.targetQty) || 0,
+        issue_qty: tier.issueQty == null ? null : Number(tier.issueQty),
+        extra_qty: tier.extraQty == null ? null : Number(tier.extraQty)
+      }).eq('id', tier.id);
+    }
+
+    await sb.from('gift_tracker_items').delete().neq('id', NO_MATCH_ID);
+    const itemRows = [];
+    state.tiers.forEach(tier => tier.items.forEach((item, i) => itemRows.push({
+      id: item.id, tier_id: tier.id, name: item.name,
+      china_cost_usd: Number(item.chinaCostUSD) || 0, qty: Number(item.qty) || 0, sort_order: i
+    })));
+    if (itemRows.length) await sb.from('gift_tracker_items').insert(itemRows);
+
+    await sb.from('gift_tracker_appreciation_requests').delete().neq('id', NO_MATCH_ID);
+    const reqRows = state.appreciation.requests.map(r => ({
+      id: r.id, customer: r.customer, request_date: r.date || null, area: r.area,
+      qty: Number(r.qty) || 0, gift_type: r.giftType, completed: !!r.completed, notes: r.notes
+    }));
+    if (reqRows.length) await sb.from('gift_tracker_appreciation_requests').insert(reqRows);
+
+    setSyncStatus('saved', 'All changes saved');
+  } catch(err){
+    console.error('Import sync failed', err);
+    setSyncStatus('error', 'Save failed — check connection');
+  }
+}
+
+async function init(){
+  try {
+    await loadState();
+    setSyncStatus('saved', 'All changes saved');
+  } catch(err){
+    console.error('Could not load saved data, starting from blank defaults', err);
+    setSyncStatus('error', 'Could not load — working offline');
+  }
+  renderAll();
+}
+
+init();
+</script>
+
+</body>
+</html>
