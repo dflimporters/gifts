@@ -8,10 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // Standalone, no login — own client instance, matches field-intel.html's pattern.
+  // Standalone, always anon. Other DFL apps on this github.io origin share the Supabase
+  // session in localStorage; picking it up makes requests run as `authenticated`, which
+  // the anon-only gift_tracker policies silently answer with zero rows.
   const sb = window.supabase.createClient(
     'https://hzagwndglwhcepsirafi.supabase.co',
-    'sb_publishable_5rAinfDT1K9kwEQnqYwlOA_-C5tk_6h'
+    'sb_publishable_5rAinfDT1K9kwEQnqYwlOA_-C5tk_6h',
+    { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'dfl-gift-tracker' } }
   );
 </script>
 <style>
@@ -1135,6 +1138,7 @@ const NO_MATCH_ID = '__none__'; // delete-all filter target; no row will ever ha
 const pending = new Map();
 let inFlight = 0;
 let lastError = null;
+let loadFailed = false; // never write defaults over data we couldn't read
 
 const itemDb = (tier, item) => ({
   id: item.id, tier_id: tier.id, name: item.name,
@@ -1164,6 +1168,10 @@ function updateSyncStatus(){
 }
 
 async function run(fn){
+  if (loadFailed){
+    setSyncStatus('error', 'Not saved — data didn’t load, refresh the page');
+    return;
+  }
   inFlight++;
   updateSyncStatus();
   try {
@@ -1226,6 +1234,7 @@ async function loadState(){
   const firstError = [settingsRes, tiersRes, itemsRes, areasRes, recipientsRes, appSettingsRes, appReqRes]
     .map(r => r.error).find(Boolean);
   if (firstError) throw firstError;
+  if (!tiersRes.data.length || !settingsRes.data) throw new Error('Database returned no tracker data');
 
   state.settings.fx = num(settingsRes.data?.fx) || 158;
   state.tiers = tiersRes.data.map(t => ({
@@ -1292,7 +1301,8 @@ async function init(){
     updateSyncStatus();
   } catch (err){
     console.error('Could not load saved data', err);
-    setSyncStatus('error', 'Could not load — changes won’t save');
+    setSyncStatus('error', 'Could not load data — refresh the page');
+    loadFailed = true;
   }
   renderAll();
   switchTab(ui.tab);
