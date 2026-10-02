@@ -180,6 +180,13 @@
   .status-sent{background:var(--green-bg);color:var(--green);border-color:rgba(22,163,74,.25);}
   .status-pending{background:var(--amber-bg);color:var(--amber);border-color:rgba(217,119,6,.25);}
   .status-toggle svg{width:12px;height:12px;}
+  .row-writeoff td{background:var(--amber-bg);}
+  .row-writeoff td:first-child{box-shadow:inset 3px 0 0 var(--amber);}
+  .writeoff-num{color:var(--amber) !important;}
+  .cost-legend{display:inline-block;font-size:11px;font-weight:700;color:var(--amber);background:var(--amber-bg);border:1px solid rgba(217,119,6,.25);border-radius:100px;padding:1px 9px;}
+  .sum-stat.app{border-left-color:var(--amber);}
+  .sum-stat .writeoff{font-size:11px;font-weight:700;color:var(--amber);}
+  .sum-stat.total .writeoff{color:#fcd34d;}
 
   footer{padding:26px 0;text-align:center;}
   footer p{font-size:11px;color:var(--text-faint);margin:0;}
@@ -255,6 +262,29 @@
   <!-- ============ TAB: CUSTOMER APPRECIATION ============ -->
   <section class="tab-panel" id="tab-appreciation">
     <div class="card">
+      <p class="eyebrow">Bag Costing</p>
+      <h2>What goes in each bag</h2>
+      <p class="subtitle">Cost per bag = unit cost × qty per bag. <span class="cost-legend">Stock write-off</span> rows are DFL stock given away — a product write-off at cost, not a cash purchase.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Cost Type</th>
+              <th class="num-cell">Unit Cost (JMD)</th>
+              <th class="num-cell">Qty per Bag</th>
+              <th class="num-cell">Cost per Bag</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="bag-items-tbody"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" data-action="add-bag-item">+ Add stock item</button>
+      <div class="tier-footer" id="bag-cost-footer"></div>
+    </div>
+
+    <div class="card">
       <p class="eyebrow">Local Gift Bags</p>
       <h2>Customer Appreciation requests</h2>
       <p class="subtitle">Separate from the tiered gifts — locally-assembled bags given out (typically 5 at a time) to stores that request them for their own end-of-year customer appreciation.</p>
@@ -303,7 +333,7 @@
     <div class="card">
       <p class="eyebrow">Overview</p>
       <h2>Gifts &amp; costs by class</h2>
-      <p class="subtitle">Est. total cost = order qty × landed cost for each item in the class (from Tiers &amp; Costing).</p>
+      <p class="subtitle">Tiers: order qty × landed cost for each item (Tiers &amp; Costing). Appreciation: target bags × cost per bag (Customer Appreciation → Bag Costing).</p>
       <div class="table-wrap" id="summary-table"></div>
     </div>
     <div class="summary-grid" id="summary-cards"></div>
@@ -336,7 +366,7 @@ let state = {
   tiers: [],
   areas: [],
   recipients: [],
-  appreciation: { targetAllocation: 1000, defaultQty: 5, requests: [] }
+  appreciation: { targetAllocation: 1000, defaultQty: 5, requests: [], items: [] }
 };
 
 const ui = { tab: 'tiers', area: null, filter: '' };
@@ -364,6 +394,7 @@ const tierById = id => state.tiers.find(t => t.id === id);
 const areaById = id => state.areas.find(a => a.id === id);
 const recipientById = id => state.recipients.find(r => r.id === id);
 const requestById = id => state.appreciation.requests.find(r => r.id === id);
+const bagItemById = id => state.appreciation.items.find(i => i.id === id);
 
 /* =========================================================================
    CALCS
@@ -378,6 +409,10 @@ function recipientsIn(areaId){ return state.recipients.filter(r => r.areaId === 
 function giftCount(recipients, tierId){ return recipients.reduce((s, r) => s + int(r.tierQty[tierId]), 0); }
 function recipientCost(r){ return state.tiers.reduce((s, t) => s + int(r.tierQty[t.id]) * tierGiftCost(t), 0); }
 function recipientsCost(recipients){ return recipients.reduce((s, r) => s + recipientCost(r), 0); }
+function bagLine(i){ return num(i.unitCost) * int(i.qtyPerBag); }
+function bagCost(type){
+  return state.appreciation.items.filter(i => !type || i.costType === type).reduce((s, i) => s + bagLine(i), 0);
+}
 function appBagsIn(areaId){
   return state.appreciation.requests.filter(r => r.salesAreaId === areaId).reduce((s, r) => s + int(r.qty), 0);
 }
@@ -483,19 +518,25 @@ function renderTierCard(tier){
 const TIER_COLORS = { Platinum: '#5b6472', Gold: '#c8922a', Silver: '#8b96a4' };
 
 function renderTierSummary(){
-  const stat = (label, gifts, cost, assigned, cls, color) => `
+  const stat = (label, gifts, unit, cost, assigned, cls, color, writeoff = 0) => `
     <div class="sum-stat ${cls}" ${color ? `style="border-left-color:${color}"` : ''}>
       <div class="lbl">${esc(label)}</div>
-      <div class="gifts">${fmtNum(gifts)} <small>gifts</small></div>
+      <div class="gifts">${fmtNum(gifts)} <small>${unit}</small></div>
       <div class="cost">${fmtJMD(cost)}</div>
+      ${writeoff ? `<div class="writeoff">incl. ${fmtJMD(writeoff)} stock write-off</div>` : ''}
       <div class="assigned">${fmtNum(assigned)} assigned</div>
     </div>`;
-  const gifts = state.tiers.reduce((s, t) => s + int(t.targetQty), 0);
-  const cost = state.tiers.reduce((s, t) => s + tierOrderTotal(t), 0);
-  const assigned = state.tiers.reduce((s, t) => s + giftCount(state.recipients, t.id), 0);
+  const bags = int(state.appreciation.targetAllocation);
+  const bagsRequested = state.appreciation.requests.reduce((s, r) => s + int(r.qty), 0);
+  const bagCash = bagCost('cash') * bags;
+  const bagWriteoff = bagCost('writeoff') * bags;
+  const gifts = state.tiers.reduce((s, t) => s + int(t.targetQty), 0) + bags;
+  const cost = state.tiers.reduce((s, t) => s + tierOrderTotal(t), 0) + bagCash + bagWriteoff;
+  const assigned = state.tiers.reduce((s, t) => s + giftCount(state.recipients, t.id), 0) + bagsRequested;
   document.getElementById('tier-summary').innerHTML =
-    stat('Total', gifts, cost, assigned, 'total') +
-    state.tiers.map(t => stat(t.name, int(t.targetQty), tierOrderTotal(t), giftCount(state.recipients, t.id), '', TIER_COLORS[t.name])).join('');
+    stat('Total', gifts, 'gifts', cost, assigned, 'total', '', bagWriteoff) +
+    state.tiers.map(t => stat(t.name, int(t.targetQty), 'gifts', tierOrderTotal(t), giftCount(state.recipients, t.id), '', TIER_COLORS[t.name])).join('') +
+    stat('Appreciation', bags, 'bags', bagCash + bagWriteoff, bagsRequested, 'app', '', bagWriteoff);
 }
 
 function refreshTierCalcs(){
@@ -738,7 +779,27 @@ function areaOptions(selected){
     `<option value="${esc(a.id)}" ${a.id === selected ? 'selected' : ''}>${esc(a.name)}</option>`).join('');
 }
 
+function renderBagItems(){
+  const items = state.appreciation.items;
+  document.getElementById('bag-items-tbody').innerHTML = items.length ? items.map(i => `
+    <tr data-bag-item="${esc(i.id)}" class="${i.costType === 'writeoff' ? 'row-writeoff' : ''}">
+      <td class="col-name">${textInput('bagItem', 'name', i.name, i.costType === 'cash' ? 'e.g. Branded gift bag' : 'DFL stock item')}</td>
+      <td>
+        <select data-kind="bagItem" data-field="costType">
+          <option value="cash" ${i.costType === 'cash' ? 'selected' : ''}>Cash purchase</option>
+          <option value="writeoff" ${i.costType === 'writeoff' ? 'selected' : ''}>Stock write-off</option>
+        </select>
+      </td>
+      <td>${numInput('bagItem', 'unitCost', i.unitCost, 'decimal')}</td>
+      <td>${numInput('bagItem', 'qtyPerBag', i.qtyPerBag, 'int')}</td>
+      <td class="num-cell line-total-cell" data-calc="bagline"></td>
+      <td><button class="row-remove" data-action="remove-bag-item" title="Remove item">&times;</button></td>
+    </tr>`).join('')
+    : `<tr class="empty-row"><td colspan="6">No bag items yet — add one below.</td></tr>`;
+}
+
 function renderAppreciation(){
+  renderBagItems();
   document.getElementById('app-target').value = state.appreciation.targetAllocation;
   document.getElementById('app-default-qty').value = state.appreciation.defaultQty;
 
@@ -773,6 +834,42 @@ function refreshAppreciationTotals(){
   const rem = document.getElementById('app-remaining');
   rem.textContent = fmtNum(remaining);
   rem.classList.toggle('over', remaining < 0);
+
+  document.querySelectorAll('#bag-items-tbody tr[data-bag-item]').forEach(tr => {
+    const i = bagItemById(tr.dataset.bagItem);
+    if (!i) return;
+    const cell = tr.querySelector('[data-calc="bagline"]');
+    cell.textContent = fmtJMD(bagLine(i));
+    cell.classList.toggle('writeoff-num', i.costType === 'writeoff');
+  });
+
+  const cash = bagCost('cash'), writeoff = bagCost('writeoff');
+  const bags = int(state.appreciation.targetAllocation);
+  document.getElementById('bag-cost-footer').innerHTML = `
+    <div class="stat"><span class="num">${fmtJMD(cash)}</span><span class="lbl">Cash per Bag</span></div>
+    <div class="stat"><span class="num writeoff-num">${fmtJMD(writeoff)}</span><span class="lbl">Write-off per Bag</span></div>
+    <div class="stat"><span class="num">${fmtJMD(cash + writeoff)}</span><span class="lbl">Total per Bag</span></div>
+    <div class="stat"><span class="num">${fmtJMD(cash * bags)}</span><span class="lbl">Cash Total (${fmtNum(bags)} bags)</span></div>
+    <div class="stat"><span class="num writeoff-num">${fmtJMD(writeoff * bags)}</span><span class="lbl">Write-off Total (${fmtNum(bags)} bags)</span></div>`;
+}
+
+function addBagItem(){
+  const i = { id: uid(), name: '', costType: 'writeoff', unitCost: 0, qtyPerBag: 1 };
+  state.appreciation.items.push(i);
+  renderBagItems();
+  refreshComputed();
+  focusIn(`#bag-items-tbody tr[data-bag-item="${CSS.escape(i.id)}"] input`);
+  saveNow(() => sb.from('gift_tracker_appreciation_items').upsert(bagItemDb(i)));
+}
+
+function removeBagItem(id){
+  const i = bagItemById(id);
+  if (i.name && !confirm(`Remove “${i.name}” from the bag?`)) return;
+  cancelSave('bagItem:' + id);
+  state.appreciation.items = state.appreciation.items.filter(x => x.id !== id);
+  renderBagItems();
+  refreshComputed();
+  saveNow(() => sb.from('gift_tracker_appreciation_items').delete().eq('id', id));
 }
 
 function addAppreciationRow(){
@@ -851,8 +948,8 @@ function renderSummary(){
           <td>${fmtNum(appTarget)}</td>
           <td>${fmtNum(appQty)}</td>
           ${leftCell(appTarget - appQty)}
-          <td class="muted">—</td>
-          <td class="muted">—</td>
+          <td>${fmtJMD(bagCost())}</td>
+          <td>${fmtJMD(bagCost() * appTarget)}</td>
         </tr>
       </tbody>
       <tfoot>
@@ -862,7 +959,11 @@ function renderSummary(){
           <td>${fmtNum(assigned + appQty)}</td>
           ${leftCell(goal - assigned + appTarget - appQty)}
           <td></td>
-          <td>${fmtJMD(orderTotal)}</td>
+          <td>${fmtJMD(orderTotal + bagCost() * appTarget)}</td>
+        </tr>
+        <tr>
+          <td colspan="5" class="writeoff-num" style="font-weight:700">of which DFL stock write-off (not cash)</td>
+          <td class="writeoff-num">${fmtJMD(bagCost('writeoff') * appTarget)}</td>
         </tr>
       </tfoot>
     </table>`;
@@ -973,6 +1074,15 @@ const inputHandlers = {
     scheduleSave('appReq:' + req.id, () => sb.from('gift_tracker_appreciation_requests').upsert(requestDb(req)));
   },
 
+  bagItem(el){
+    const tr = el.closest('[data-bag-item]');
+    const i = bagItemById(tr.dataset.bagItem);
+    const f = el.dataset.field;
+    i[f] = f === 'unitCost' ? num(el.value) : f === 'qtyPerBag' ? int(el.value) : el.value;
+    if (f === 'costType') tr.classList.toggle('row-writeoff', i.costType === 'writeoff');
+    scheduleSave('bagItem:' + i.id, () => sb.from('gift_tracker_appreciation_items').upsert(bagItemDb(i)));
+  },
+
   area(el){
     const area = areaById(el.closest('[data-area]').dataset.area);
     area[el.dataset.field] = el.value;
@@ -1042,6 +1152,8 @@ document.addEventListener('click', e => {
     case 'add-recipient': addRecipient(); break;
     case 'remove-recipient': removeRecipient(el.closest('[data-recipient]').dataset.recipient); break;
     case 'add-app': addAppreciationRow(); break;
+    case 'add-bag-item': addBagItem(); break;
+    case 'remove-bag-item': removeBagItem(el.closest('[data-bag-item]').dataset.bagItem); break;
     case 'toggle-app': toggleAppStatus(el.closest('[data-req]').dataset.req); break;
     case 'remove-app': removeAppRow(el.closest('[data-req]').dataset.req); break;
     case 'export': exportJSON(); break;
@@ -1096,7 +1208,14 @@ function normalizeState(p){
         id: String(r.id || uid()), customer: String(r.customer || ''), date: String(r.date || ''),
         area: String(r.area || ''), salesAreaId: String(r.salesAreaId || ''), qty: int(r.qty),
         giftType: String(r.giftType || ''), completed: !!r.completed, notes: String(r.notes || '')
-      }))
+      })),
+      items: Array.isArray(p.appreciation?.items)
+        ? p.appreciation.items.map(i => ({
+            id: String(i.id || uid()), name: String(i.name || ''),
+            costType: i.costType === 'cash' ? 'cash' : 'writeoff',
+            unitCost: num(i.unitCost), qtyPerBag: int(i.qtyPerBag)
+          }))
+        : state.appreciation.items
     }
   };
   const areaIds = new Set(out.areas.map(a => a.id));
@@ -1147,6 +1266,11 @@ const itemDb = (tier, item) => ({
 const recipientDb = r => ({
   id: r.id, area_id: r.areaId, customer: r.customer, sales_rep: r.salesRep,
   total_ytd: num(r.totalYtd), tier_qty: r.tierQty, notes: r.notes
+});
+const bagItemDb = i => ({
+  id: i.id, name: i.name, cost_type: i.costType === 'cash' ? 'cash' : 'writeoff',
+  unit_cost_jmd: num(i.unitCost), qty_per_bag: int(i.qtyPerBag),
+  sort_order: Math.max(0, state.appreciation.items.indexOf(i))
 });
 const requestDb = r => ({
   id: r.id, customer: r.customer, request_date: r.date || null, area: r.area,
@@ -1222,16 +1346,17 @@ window.addEventListener('beforeunload', e => {
 document.addEventListener('visibilitychange', () => { if (document.hidden) flushSaves(); });
 
 async function loadState(){
-  const [settingsRes, tiersRes, itemsRes, areasRes, recipientsRes, appSettingsRes, appReqRes] = await Promise.all([
+  const [settingsRes, tiersRes, itemsRes, areasRes, recipientsRes, appSettingsRes, appReqRes, bagItemsRes] = await Promise.all([
     sb.from('gift_tracker_settings').select('*').eq('id', 1).maybeSingle(),
     sb.from('gift_tracker_tiers').select('*').order('sort_order'),
     sb.from('gift_tracker_items').select('*').order('sort_order'),
     sb.from('gift_tracker_areas').select('*').order('sort_order'),
     sb.from('gift_tracker_recipients').select('*').order('created_at'),
     sb.from('gift_tracker_appreciation_settings').select('*').eq('id', 1).maybeSingle(),
-    sb.from('gift_tracker_appreciation_requests').select('*').order('created_at')
+    sb.from('gift_tracker_appreciation_requests').select('*').order('created_at'),
+    sb.from('gift_tracker_appreciation_items').select('*').order('sort_order')
   ]);
-  const firstError = [settingsRes, tiersRes, itemsRes, areasRes, recipientsRes, appSettingsRes, appReqRes]
+  const firstError = [settingsRes, tiersRes, itemsRes, areasRes, recipientsRes, appSettingsRes, appReqRes, bagItemsRes]
     .map(r => r.error).find(Boolean);
   if (firstError) throw firstError;
   if (!tiersRes.data.length || !settingsRes.data) throw new Error('Database returned no tracker data');
@@ -1255,6 +1380,9 @@ async function loadState(){
     id: r.id, customer: r.customer, date: r.request_date || '', area: r.area || '',
     salesAreaId: r.sales_area_id || '', qty: r.qty, giftType: r.gift_type || '',
     completed: r.completed, notes: r.notes || ''
+  }));
+  state.appreciation.items = bagItemsRes.data.map(i => ({
+    id: i.id, name: i.name, costType: i.cost_type, unitCost: num(i.unit_cost_jmd), qtyPerBag: i.qty_per_bag
   }));
 }
 
@@ -1291,6 +1419,10 @@ async function pushAllToSupabase(){
   await must(sb.from('gift_tracker_appreciation_requests').delete().neq('id', NO_MATCH_ID));
   const reqRows = state.appreciation.requests.map(requestDb);
   if (reqRows.length) await must(sb.from('gift_tracker_appreciation_requests').insert(reqRows));
+
+  await must(sb.from('gift_tracker_appreciation_items').delete().neq('id', NO_MATCH_ID));
+  const bagRows = state.appreciation.items.map(bagItemDb);
+  if (bagRows.length) await must(sb.from('gift_tracker_appreciation_items').insert(bagRows));
 }
 
 async function init(){

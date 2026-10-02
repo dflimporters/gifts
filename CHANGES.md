@@ -21,6 +21,10 @@ Tier header stats: Target Units, Assigned to Customers (sum from the area custom
 
 Mirrors the area tabs of `Customer Gifts December 2025 V2.xlsx` (South West/Trebor, South East/Travis, Hospitality/Phobea, South Central/Marilyn, North West/Rejene, North East/Ronald, Other). Each customer row: name, sales rep (person responsible for Other), Total YTD, qty per tier (columns follow the tiers table), notes. `tier_qty` is jsonb keyed by tier id. Dashboard matrix = area × tier counts + appreciation bags + est. cost, vs each tier's issue qty.
 
+## Appreciation bag costing — done
+
+`gift_tracker_appreciation_items`: what goes in each bag, with `cost_type` `cash` (e.g. the bag itself) or `writeoff` (DFL stock given away, costed at stock cost, highlighted amber). Cost per bag = Σ unit cost × qty per bag; bag totals use the target allocation. Tier summary bar and Summary table include bag costs, with the stock write-off share shown separately.
+
 Customer Appreciation requests now have a Sales Area dropdown (`sales_area_id`); the old free-text "Area" column is relabelled Location.
 
 ## Open / not done
