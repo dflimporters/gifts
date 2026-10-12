@@ -58,7 +58,16 @@
   .sync-status.error{color:#fecaca;}
 
   /* ---- tabs ---- */
-  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;background:var(--card);border:1px solid var(--line);border-radius:100px;padding:5px;width:fit-content;max-width:100%;box-shadow:0 1px 2px rgba(15,32,68,.04);}
+  .topbar{position:sticky;top:0;z-index:50;width:100%;background:var(--card);border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(15,32,68,.08);margin-bottom:22px;}
+  .topbar-inner{max-width:1180px;margin:0 auto;padding:8px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .topbar .sum-bar-stats{display:flex;gap:8px;flex:1 1 auto;justify-content:flex-end;flex-wrap:wrap;}
+  .topbar .sum-stat{padding:5px 10px;border-left-width:3px;min-width:92px;}
+  .topbar .sum-stat .lbl{font-size:9.5px;}
+  .topbar .sum-stat .gifts{font-size:14px;margin-top:0;}
+  .topbar .sum-stat .gifts small{font-size:10px;}
+  .topbar .sum-stat .cost{font-size:11.5px;margin-top:0;}
+  .topbar .sum-stat .writeoff{font-size:10px;}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:100px;padding:4px;width:fit-content;max-width:100%;}
   .tab-btn{padding:9px 18px;border-radius:100px;border:none;background:transparent;font-family:inherit;font-weight:700;font-size:13px;color:var(--text-soft);cursor:pointer;}
   .tab-btn.active{background:var(--navy);color:#fff;}
   .tab-panel{display:none;}
@@ -225,20 +234,24 @@
   </div>
 </header>
 
-<div class="wrap">
-
-  <div class="tabs">
-    <button class="tab-btn active" data-action="tab" data-tab="tiers">Tiers &amp; Costing</button>
-    <button class="tab-btn" data-action="tab" data-tab="areas">Customers by Area</button>
-    <button class="tab-btn" data-action="tab" data-tab="appreciation">Customer Appreciation</button>
-    <button class="tab-btn" data-action="tab" data-tab="summary">Summary</button>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="tabs">
+      <button class="tab-btn active" data-action="tab" data-tab="tiers">Tiers &amp; Costing</button>
+      <button class="tab-btn" data-action="tab" data-tab="areas">Customers by Area</button>
+      <button class="tab-btn" data-action="tab" data-tab="appreciation">Customer Appreciation</button>
+      <button class="tab-btn" data-action="tab" data-tab="summary">Summary</button>
+    </div>
+    <div class="sum-bar-stats" id="tier-summary"></div>
   </div>
+</div>
+
+<div class="wrap">
 
   <!-- ============ TAB: TIERS & COSTING ============ -->
   <section class="tab-panel active" id="tab-tiers">
     <div class="card sum-bar">
-      <div class="sum-bar-stats" id="tier-summary"></div>
-      <div class="fx-bar">
+      <div class="fx-bar" style="margin:0;padding:0;border:none;">
         <label for="set-fx">USD → JMD</label>
         <input type="text" class="num-input" inputmode="decimal" autocomplete="off" id="set-fx" data-kind="fx" data-num="decimal">
         <span>Applies to lines priced in USD. Each line is a component of one gift.</span>
@@ -400,7 +413,10 @@ const bagItemById = id => state.appreciation.items.find(i => i.id === id);
 // Every line in a tier is a component of ONE gift: cost per gift = sum of the lines.
 function itemJMD(item){ return item.currency === 'JMD' ? num(item.cost) : num(item.cost) * num(state.settings.fx); }
 function tierGiftCost(tier){ return tier.items.reduce((s, i) => s + itemJMD(i), 0); }
-function tierOrderTotal(tier){ return tierGiftCost(tier) * int(tier.targetQty); }
+function itemExtended(item){ return itemJMD(item) * int(item.qty); }
+function tierOrderTotal(tier){ return tier.items.reduce((s, i) => s + itemExtended(i), 0); }
+function tierWriteoff(tier){ return tier.items.filter(i => i.costType === 'writeoff').reduce((s, i) => s + itemExtended(i), 0); }
+const hasCostType = tier => tier.name === 'Silver';
 function tierGoal(tier){ return int(tier.targetQty); }
 
 function recipientsIn(areaId){ return state.recipients.filter(r => r.areaId === areaId); }
@@ -453,9 +469,16 @@ function renderTiers(){
 }
 
 function renderTierCard(tier){
+  const ct = hasCostType(tier);
   const rows = tier.items.length ? tier.items.map(item => `
-      <tr data-item="${esc(item.id)}">
+      <tr data-item="${esc(item.id)}" class="${ct && item.costType === 'writeoff' ? 'row-writeoff' : ''}">
         <td class="col-name">${textInput('item', 'name', item.name, 'Item name')}</td>
+        ${ct ? `<td>
+          <select data-kind="item" data-field="costType">
+            <option value="regular" ${item.costType !== 'writeoff' ? 'selected' : ''}>Regular</option>
+            <option value="writeoff" ${item.costType === 'writeoff' ? 'selected' : ''}>Stock write-off</option>
+          </select>
+        </td>` : ''}
         <td>
           <select data-kind="item" data-field="currency">
             <option value="USD" ${item.currency !== 'JMD' ? 'selected' : ''}>USD</option>
@@ -464,9 +487,11 @@ function renderTierCard(tier){
         </td>
         <td>${numInput('item', 'cost', item.cost, 'decimal')}</td>
         <td class="num-cell landed-cell" data-calc="jmd"></td>
+        <td>${numInput('item', 'qty', item.qty, 'int')}</td>
+        <td class="num-cell line-total-cell" data-calc="line"></td>
         <td><button class="row-remove" data-action="remove-item" title="Remove item">&times;</button></td>
       </tr>`).join('')
-    : `<tr class="empty-row"><td colspan="5">No items yet — add one below.</td></tr>`;
+    : `<tr class="empty-row"><td colspan="${ct ? 8 : 7}">No items yet — add one below.</td></tr>`;
 
   return `
     <div class="card" data-tier="${esc(tier.id)}">
@@ -490,9 +515,12 @@ function renderTierCard(tier){
           <thead>
             <tr>
               <th>Item</th>
+              ${ct ? '<th>Cost Type</th>' : ''}
               <th>Currency</th>
               <th class="num-cell">Cost</th>
               <th class="num-cell">Cost (JMD)</th>
+              <th class="num-cell">Order Qty</th>
+              <th class="num-cell">Extended (JMD)</th>
               <th></th>
             </tr>
           </thead>
@@ -513,19 +541,19 @@ function renderTierSummary(){
       <div class="lbl">${esc(label)}</div>
       <div class="gifts">${fmtNum(gifts)} <small>${unit}</small></div>
       <div class="cost">${fmtJMD(cost)}</div>
-      ${writeoff ? `<div class="writeoff">incl. ${fmtJMD(writeoff)} stock write-off</div>` : ''}
-      <div class="assigned">${fmtNum(assigned)} assigned</div>
+      ${writeoff ? `<div class="writeoff">incl. ${fmtJMD(writeoff)} w/o</div>` : ''}
     </div>`;
   const bags = int(state.appreciation.targetAllocation);
   const bagsRequested = state.appreciation.requests.reduce((s, r) => s + int(r.qty), 0);
   const bagCash = bagCost('cash') * bags;
   const bagWriteoff = bagCost('writeoff') * bags;
   const gifts = state.tiers.reduce((s, t) => s + int(t.targetQty), 0) + bags;
+  const tierWO = state.tiers.reduce((s, t) => s + tierWriteoff(t), 0);
   const cost = state.tiers.reduce((s, t) => s + tierOrderTotal(t), 0) + bagCash + bagWriteoff;
   const assigned = state.tiers.reduce((s, t) => s + giftCount(state.recipients, t.id), 0) + bagsRequested;
   document.getElementById('tier-summary').innerHTML =
-    stat('Total', gifts, 'gifts', cost, assigned, 'total', '', bagWriteoff) +
-    state.tiers.map(t => stat(t.name, int(t.targetQty), 'gifts', tierOrderTotal(t), giftCount(state.recipients, t.id), '', TIER_COLORS[t.name])).join('') +
+    stat('Total', gifts, 'gifts', cost, assigned, 'total', '', bagWriteoff + tierWO) +
+    state.tiers.map(t => stat(t.name, int(t.targetQty), 'gifts', tierOrderTotal(t), giftCount(state.recipients, t.id), '', TIER_COLORS[t.name], tierWriteoff(t))).join('') +
     stat('Appreciation', bags, 'bags', bagCash + bagWriteoff, bagsRequested, 'app', '', bagWriteoff);
 }
 
@@ -539,6 +567,8 @@ function refreshTierCalcs(){
       const item = tier.items.find(i => i.id === tr.dataset.item);
       if (!item) return;
       tr.querySelector('[data-calc="jmd"]').textContent = fmtJMD(itemJMD(item));
+      tr.querySelector('[data-calc="line"]').textContent = fmtJMD(itemExtended(item));
+      tr.classList.toggle('row-writeoff', hasCostType(tier) && item.costType === 'writeoff');
     });
 
     const assigned = giftCount(state.recipients, tier.id);
@@ -550,13 +580,14 @@ function refreshTierCalcs(){
 
     card.querySelector('[data-calc="tier-footer"]').innerHTML = `
       <div class="stat"><span class="num">${fmtJMD(tierGiftCost(tier))}</span><span class="lbl">Cost per Gift (all lines combined)</span></div>
-      <div class="stat"><span class="num">${fmtJMD(tierOrderTotal(tier))}</span><span class="lbl">Est. Total (${fmtNum(int(tier.targetQty))} gifts)</span></div>`;
+      <div class="stat"><span class="num">${fmtJMD(tierOrderTotal(tier))}</span><span class="lbl">Est. Total (extended)</span></div>${hasCostType(tier) ? `
+      <div class="stat"><span class="num writeoff-num">${fmtJMD(tierWriteoff(tier))}</span><span class="lbl">of which Stock Write-off</span></div>` : ''}`;
   });
 }
 
 function addItem(tierId){
   const tier = tierById(tierId);
-  const item = { id: uid(), name: '', currency: 'USD', cost: 0, qty: int(tier.targetQty) };
+  const item = { id: uid(), name: '', currency: 'USD', costType: 'regular', cost: 0, qty: int(tier.targetQty) };
   tier.items.push(item);
   renderTiers();
   refreshComputed();
@@ -944,7 +975,7 @@ function renderSummary(){
         </tr>
         <tr>
           <td colspan="5" class="writeoff-num" style="font-weight:700">of which DFL stock write-off (not cash)</td>
-          <td class="writeoff-num">${fmtJMD(bagCost('writeoff') * appTarget)}</td>
+          <td class="writeoff-num">${fmtJMD(bagCost('writeoff') * appTarget + state.tiers.reduce((s, t) => s + tierWriteoff(t), 0))}</td>
         </tr>
       </tfoot>
     </table>`;
@@ -1032,7 +1063,7 @@ const inputHandlers = {
     const tier = tierById(el.closest('[data-tier]').dataset.tier);
     const item = tier.items.find(i => i.id === el.closest('[data-item]').dataset.item);
     const f = el.dataset.field;
-    item[f] = (f === 'name' || f === 'currency') ? el.value : num(el.value);
+    item[f] = f === 'qty' ? int(el.value) : (f === 'name' || f === 'currency' || f === 'costType') ? el.value : num(el.value);
     scheduleSave('item:' + item.id, () => sb.from('gift_tracker_items').upsert(itemDb(tier, item)));
   },
 
@@ -1162,7 +1193,7 @@ function normalizeState(p){
       id: String(t.id), name: String(t.name || t.id), pillClass: String(t.pillClass || ''),
       targetQty: int(t.targetQty),
       items: (t.items || []).map(i => ({
-        id: String(i.id || uid()), name: String(i.name || ''), currency: i.currency === 'JMD' ? 'JMD' : 'USD',
+        id: String(i.id || uid()), name: String(i.name || ''), currency: i.currency === 'JMD' ? 'JMD' : 'USD', costType: i.costType === 'writeoff' ? 'writeoff' : 'regular',
         cost: num(i.cost ?? i.chinaCostUSD), qty: int(i.qty)
       }))
     })),
@@ -1237,7 +1268,7 @@ let loadFailed = false; // never write defaults over data we couldn't read
 
 const itemDb = (tier, item) => ({
   id: item.id, tier_id: tier.id, name: item.name,
-  china_cost_usd: num(item.cost), currency: item.currency === 'JMD' ? 'JMD' : 'USD', qty: int(item.qty), sort_order: Math.max(0, tier.items.indexOf(item))
+  china_cost_usd: num(item.cost), currency: item.currency === 'JMD' ? 'JMD' : 'USD', cost_type: item.costType === 'writeoff' ? 'writeoff' : 'regular', qty: int(item.qty), sort_order: Math.max(0, tier.items.indexOf(item))
 });
 const recipientDb = r => ({
   id: r.id, area_id: r.areaId, customer: r.customer, sales_rep: r.salesRep,
@@ -1342,7 +1373,7 @@ async function loadState(){
     id: t.id, name: t.name, pillClass: t.pill_class,
     targetQty: t.target_qty,
     items: itemsRes.data.filter(i => i.tier_id === t.id).map(i => ({
-      id: i.id, name: i.name, currency: i.currency === 'JMD' ? 'JMD' : 'USD', cost: num(i.china_cost_usd), qty: i.qty
+      id: i.id, name: i.name, currency: i.currency === 'JMD' ? 'JMD' : 'USD', costType: i.cost_type === 'writeoff' ? 'writeoff' : 'regular', cost: num(i.china_cost_usd), qty: i.qty
     }))
   }));
   state.areas = areasRes.data.map(a => ({ id: a.id, name: a.name, manager: a.manager }));
