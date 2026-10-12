@@ -401,7 +401,7 @@ const bagItemById = id => state.appreciation.items.find(i => i.id === id);
 function itemJMD(item){ return item.currency === 'JMD' ? num(item.cost) : num(item.cost) * num(state.settings.fx); }
 function tierGiftCost(tier){ return tier.items.reduce((s, i) => s + itemJMD(i), 0); }
 function tierOrderTotal(tier){ return tierGiftCost(tier) * int(tier.targetQty); }
-function tierGoal(tier){ return tier.issueQty != null ? int(tier.issueQty) : int(tier.targetQty); }
+function tierGoal(tier){ return int(tier.targetQty); }
 
 function recipientsIn(areaId){ return state.recipients.filter(r => r.areaId === areaId); }
 function giftCount(recipients, tierId){ return recipients.reduce((s, r) => s + int(r.tierQty[tierId]), 0); }
@@ -453,7 +453,6 @@ function renderTiers(){
 }
 
 function renderTierCard(tier){
-  const hasIssue = tier.issueQty != null;
   const rows = tier.items.length ? tier.items.map(item => `
       <tr data-item="${esc(item.id)}">
         <td class="col-name">${textInput('item', 'name', item.name, 'Item name')}</td>
@@ -481,19 +480,9 @@ function renderTierCard(tier){
 
       <div class="qty-inline">
         <div class="field">
-          <label>Target qty (tier)</label>
-          ${numInput('tier', 'targetQty', tier.targetQty, 'int', hasIssue ? 'readonly title="Issue qty + extra"' : '')}
+          <label>Qty</label>
+          ${numInput('tier', 'targetQty', tier.targetQty, 'int')}
         </div>
-        ${hasIssue ? `
-        <div class="field">
-          <label>Issue qty</label>
-          ${numInput('tier', 'issueQty', tier.issueQty, 'int')}
-        </div>
-        <div class="field">
-          <label>Extra / buffer</label>
-          ${numInput('tier', 'extraQty', tier.extraQty, 'int')}
-        </div>` : ''}
-        <span class="qty-note" data-calc="tier-note"></span>
       </div>
 
       <div class="table-wrap">
@@ -555,13 +544,9 @@ function refreshTierCalcs(){
     const assigned = giftCount(state.recipients, tier.id);
     const left = tierGoal(tier) - assigned;
     card.querySelector('[data-calc="tier-stats"]').innerHTML = `
-      <div class="stat"><span class="num">${fmtNum(int(tier.targetQty))}</span><span class="lbl">Target Units</span></div>
+      <div class="stat"><span class="num">${fmtNum(int(tier.targetQty))}</span><span class="lbl">Qty</span></div>
       <div class="stat"><span class="num">${fmtNum(assigned)}</span><span class="lbl">Assigned to Customers</span></div>
       <div class="stat"><span class="num ${left < 0 ? 'over' : ''}">${left < 0 ? 'Over by ' + fmtNum(-left) : fmtNum(left)}</span><span class="lbl">Left to Assign</span></div>`;
-
-    card.querySelector('[data-calc="tier-note"]').textContent = tier.issueQty != null
-      ? `${fmtNum(int(tier.issueQty))} to issue + ${fmtNum(int(tier.extraQty))} extra = ${fmtNum(int(tier.targetQty))} target. “Left to assign” counts against the ${fmtNum(int(tier.issueQty))} to issue.`
-      : '';
 
     card.querySelector('[data-calc="tier-footer"]').innerHTML = `
       <div class="stat"><span class="num">${fmtJMD(tierGiftCost(tier))}</span><span class="lbl">Cost per Gift (all lines combined)</span></div>
@@ -1036,14 +1021,10 @@ const inputHandlers = {
     const card = el.closest('[data-tier]');
     const tier = tierById(card.dataset.tier);
     tier[el.dataset.field] = int(el.value);
-    if (tier.issueQty != null && el.dataset.field !== 'targetQty'){
-      tier.targetQty = int(tier.issueQty) + int(tier.extraQty);
-      card.querySelector('[data-field="targetQty"]').value = tier.targetQty;
-    }
     scheduleSave('tier:' + tier.id, () => sb.from('gift_tracker_tiers').update({
       target_qty: int(tier.targetQty),
-      issue_qty: tier.issueQty == null ? null : int(tier.issueQty),
-      extra_qty: tier.extraQty == null ? null : int(tier.extraQty)
+      issue_qty: null,
+      extra_qty: null
     }).eq('id', tier.id));
   },
 
@@ -1180,8 +1161,6 @@ function normalizeState(p){
     tiers: p.tiers.map(t => ({
       id: String(t.id), name: String(t.name || t.id), pillClass: String(t.pillClass || ''),
       targetQty: int(t.targetQty),
-      issueQty: t.issueQty == null ? null : int(t.issueQty),
-      extraQty: t.extraQty == null ? null : int(t.extraQty),
       items: (t.items || []).map(i => ({
         id: String(i.id || uid()), name: String(i.name || ''), currency: i.currency === 'JMD' ? 'JMD' : 'USD',
         cost: num(i.cost ?? i.chinaCostUSD), qty: int(i.qty)
@@ -1361,7 +1340,7 @@ async function loadState(){
   state.settings.fx = num(settingsRes.data?.fx) || 160;
   state.tiers = tiersRes.data.map(t => ({
     id: t.id, name: t.name, pillClass: t.pill_class,
-    targetQty: t.target_qty, issueQty: t.issue_qty, extraQty: t.extra_qty,
+    targetQty: t.target_qty,
     items: itemsRes.data.filter(i => i.tier_id === t.id).map(i => ({
       id: i.id, name: i.name, currency: i.currency === 'JMD' ? 'JMD' : 'USD', cost: num(i.china_cost_usd), qty: i.qty
     }))
@@ -1397,8 +1376,8 @@ async function pushAllToSupabase(){
   await must(sb.from('gift_tracker_tiers').upsert(state.tiers.map((t, i) => ({
     id: t.id, name: t.name, pill_class: t.pillClass, sort_order: i,
     target_qty: int(t.targetQty),
-    issue_qty: t.issueQty == null ? null : int(t.issueQty),
-    extra_qty: t.extraQty == null ? null : int(t.extraQty)
+    issue_qty: null,
+    extra_qty: null
   }))));
 
   await must(sb.from('gift_tracker_items').delete().neq('id', NO_MATCH_ID));
