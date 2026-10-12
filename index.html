@@ -59,14 +59,27 @@
 
   /* ---- tabs ---- */
   .topbar{position:sticky;top:0;z-index:50;width:100%;background:var(--card);border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(15,32,68,.08);margin-bottom:22px;}
-  .topbar-inner{max-width:1180px;margin:0 auto;padding:8px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-  .topbar .sum-bar-stats{display:flex;gap:8px;flex:1 1 auto;justify-content:flex-end;flex-wrap:wrap;}
-  .topbar .sum-stat{padding:5px 10px;border-left-width:3px;min-width:92px;}
-  .topbar .sum-stat .lbl{font-size:9.5px;}
-  .topbar .sum-stat .gifts{font-size:14px;margin-top:0;}
-  .topbar .sum-stat .gifts small{font-size:10px;}
-  .topbar .sum-stat .cost{font-size:11.5px;margin-top:0;}
-  .topbar .sum-stat .writeoff{font-size:10px;}
+  .topbar-inner{max-width:1180px;margin:0 auto;padding:0 20px 12px;}
+  .topbar .tabs{background:none;border:none;border-radius:0;padding:0;gap:4px;width:100%;flex-wrap:nowrap;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:10px;}
+  .topbar .tab-btn{border-radius:0;padding:14px 16px 11px;border-bottom:3px solid transparent;background:none;white-space:nowrap;}
+  .topbar .tab-btn:hover{color:var(--navy);}
+  .topbar .tab-btn.active{background:none;color:var(--navy);border-bottom-color:var(--blue);}
+  .ts-grid{display:grid;grid-template-columns:1.25fr repeat(4,1fr);gap:10px;}
+  .ts{--c:var(--blue);display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:10px;background:var(--bg);border-top:3px solid var(--c);min-width:0;}
+  .ts-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .ts-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);}
+  .ts-n{font-size:11px;font-weight:600;color:var(--text-faint);white-space:nowrap;}
+  .ts-cost{font-size:17px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .ts-wo{font-size:10.5px;font-weight:700;color:var(--amber);white-space:nowrap;}
+  .ts.total{background:var(--navy);border-top-color:#93c5fd;}
+  .ts.total .ts-lbl{color:rgba(255,255,255,.65);}
+  .ts.total .ts-n{color:rgba(255,255,255,.6);}
+  .ts.total .ts-cost{color:#fff;font-size:19px;}
+  .ts.total .ts-wo{color:#fcd34d;}
+  @media (max-width:760px){
+    .ts-grid{grid-template-columns:repeat(5,minmax(130px,1fr));overflow-x:auto;padding-bottom:4px;}
+  }
+  .sum-bar{padding:12px 18px;}
   .tabs{display:flex;flex-wrap:wrap;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:100px;padding:4px;width:fit-content;max-width:100%;}
   .tab-btn{padding:9px 18px;border-radius:100px;border:none;background:transparent;font-family:inherit;font-weight:700;font-size:13px;color:var(--text-soft);cursor:pointer;}
   .tab-btn.active{background:var(--navy);color:#fff;}
@@ -88,19 +101,6 @@
   .field .hint{font-size:10.5px;color:var(--text-faint);margin-top:4px;}
 
   .sum-bar{padding:16px 18px;}
-  .sum-bar-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
-  .sum-stat .assigned{font-size:11px;font-weight:600;color:var(--text-faint);}
-  .sum-stat.total .assigned{color:rgba(255,255,255,.6);}
-  .sum-stat{padding:10px 14px;border-radius:var(--radius-sm);background:var(--bg);border-left:4px solid var(--blue);}
-  .sum-stat.total{background:var(--navy);border-left-color:var(--navy);color:#fff;}
-  .sum-stat .lbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);}
-  .sum-stat.total .lbl{color:rgba(255,255,255,.65);}
-  .sum-stat .gifts{font-size:20px;font-weight:800;color:var(--navy);line-height:1.2;margin-top:2px;}
-  .sum-stat.total .gifts{color:#fff;}
-  .sum-stat .gifts small{font-size:11px;font-weight:600;color:var(--text-faint);}
-  .sum-stat.total .gifts small{color:rgba(255,255,255,.6);}
-  .sum-stat .cost{font-size:12.5px;font-weight:700;color:var(--blue);margin-top:1px;}
-  .sum-stat.total .cost{color:#93c5fd;}
   .fx-bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
   .fx-bar label{font-size:11.5px;font-weight:700;color:var(--text-soft);}
   .fx-bar input{width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;background:#fbfcfe;color:var(--text);}
@@ -122,9 +122,6 @@
   .stat .lbl{font-size:10.5px;color:var(--text-faint);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
   .over{color:var(--red) !important;}
 
-  .qty-inline{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-  .qty-inline .field{width:130px;}
-  .qty-note{font-size:11.5px;color:var(--text-faint);padding-bottom:10px;}
 
   /* ---- table ---- */
   .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-sm);}
@@ -193,9 +190,6 @@
   .row-writeoff td:first-child{box-shadow:inset 3px 0 0 var(--amber);}
   .writeoff-num{color:var(--amber) !important;}
   .cost-legend{display:inline-block;font-size:11px;font-weight:700;color:var(--amber);background:var(--amber-bg);border:1px solid rgba(217,119,6,.25);border-radius:100px;padding:1px 9px;}
-  .sum-stat.app{border-left-color:var(--amber);}
-  .sum-stat .writeoff{font-size:11px;font-weight:700;color:var(--amber);}
-  .sum-stat.total .writeoff{color:#fcd34d;}
 
   footer{padding:26px 0;text-align:center;}
   footer p{font-size:11px;color:var(--text-faint);margin:0;}
@@ -242,7 +236,7 @@
       <button class="tab-btn" data-action="tab" data-tab="appreciation">Customer Appreciation</button>
       <button class="tab-btn" data-action="tab" data-tab="summary">Summary</button>
     </div>
-    <div class="sum-bar-stats" id="tier-summary"></div>
+    <div class="ts-grid" id="tier-summary"></div>
   </div>
 </div>
 
@@ -418,6 +412,14 @@ function tierOrderTotal(tier){ return tier.items.reduce((s, i) => s + itemExtend
 function tierWriteoff(tier){ return tier.items.filter(i => i.costType === 'writeoff').reduce((s, i) => s + itemExtended(i), 0); }
 const hasCostType = tier => tier.name === 'Silver';
 function tierGoal(tier){ return int(tier.targetQty); }
+// Gifts in a tier = the largest order qty on any line (lines are parts of one gift).
+function syncTierTarget(tier, save){
+  if (!tier.items.length) return;
+  const n = Math.max(...tier.items.map(i => int(i.qty)));
+  if (n === int(tier.targetQty)) return;
+  tier.targetQty = n;
+  if (save) scheduleSave('tier:' + tier.id, () => sb.from('gift_tracker_tiers').update({ target_qty: n }).eq('id', tier.id));
+}
 
 function recipientsIn(areaId){ return state.recipients.filter(r => r.areaId === areaId); }
 function giftCount(recipients, tierId){ return recipients.reduce((s, r) => s + int(r.tierQty[tierId]), 0); }
@@ -503,13 +505,6 @@ function renderTierCard(tier){
         <div class="tier-stats" data-calc="tier-stats"></div>
       </div>
 
-      <div class="qty-inline">
-        <div class="field">
-          <label>Qty</label>
-          ${numInput('tier', 'targetQty', tier.targetQty, 'int')}
-        </div>
-      </div>
-
       <div class="table-wrap">
         <table>
           <thead>
@@ -536,25 +531,22 @@ function renderTierCard(tier){
 const TIER_COLORS = { Platinum: '#5b6472', Gold: '#c8922a', Silver: '#8b96a4' };
 
 function renderTierSummary(){
-  const stat = (label, gifts, unit, cost, assigned, cls, color, writeoff = 0) => `
-    <div class="sum-stat ${cls}" ${color ? `style="border-left-color:${color}"` : ''}>
-      <div class="lbl">${esc(label)}</div>
-      <div class="gifts">${fmtNum(gifts)} <small>${unit}</small></div>
-      <div class="cost">${fmtJMD(cost)}</div>
-      ${writeoff ? `<div class="writeoff">incl. ${fmtJMD(writeoff)} w/o</div>` : ''}
+  const stat = (label, gifts, unit, cost, cls, color, writeoff = 0) => `
+    <div class="ts ${cls}" ${color ? `style="--c:${color}"` : ''}>
+      <div class="ts-top"><span class="ts-lbl">${esc(label)}</span><span class="ts-n">${fmtNum(gifts)} ${unit}</span></div>
+      <div class="ts-cost">${fmtJMD(cost)}</div>
+      ${writeoff ? `<div class="ts-wo">incl. ${fmtJMD(writeoff)} write-off</div>` : ''}
     </div>`;
   const bags = int(state.appreciation.targetAllocation);
-  const bagsRequested = state.appreciation.requests.reduce((s, r) => s + int(r.qty), 0);
   const bagCash = bagCost('cash') * bags;
   const bagWriteoff = bagCost('writeoff') * bags;
   const gifts = state.tiers.reduce((s, t) => s + int(t.targetQty), 0) + bags;
   const tierWO = state.tiers.reduce((s, t) => s + tierWriteoff(t), 0);
   const cost = state.tiers.reduce((s, t) => s + tierOrderTotal(t), 0) + bagCash + bagWriteoff;
-  const assigned = state.tiers.reduce((s, t) => s + giftCount(state.recipients, t.id), 0) + bagsRequested;
   document.getElementById('tier-summary').innerHTML =
-    stat('Total', gifts, 'gifts', cost, assigned, 'total', '', bagWriteoff + tierWO) +
-    state.tiers.map(t => stat(t.name, int(t.targetQty), 'gifts', tierOrderTotal(t), giftCount(state.recipients, t.id), '', TIER_COLORS[t.name], tierWriteoff(t))).join('') +
-    stat('Appreciation', bags, 'bags', bagCash + bagWriteoff, bagsRequested, 'app', '', bagWriteoff);
+    stat('Total', gifts, 'gifts', cost, 'total', '', bagWriteoff + tierWO) +
+    state.tiers.map(t => stat(t.name, int(t.targetQty), 'gifts', tierOrderTotal(t), '', TIER_COLORS[t.name], tierWriteoff(t))).join('') +
+    stat('Appreciation', bags, 'bags', bagCash + bagWriteoff, '', '#d97706', bagWriteoff);
 }
 
 function refreshTierCalcs(){
@@ -601,6 +593,7 @@ function removeItem(tierId, itemId){
   if (item.name && !confirm(`Remove “${item.name}” from ${tier.name}?`)) return;
   cancelSave('item:' + itemId);
   tier.items = tier.items.filter(i => i.id !== itemId);
+  syncTierTarget(tier, true);
   renderTiers();
   refreshComputed();
   saveNow(() => sb.from('gift_tracker_items').delete().eq('id', itemId));
@@ -1064,6 +1057,7 @@ const inputHandlers = {
     const item = tier.items.find(i => i.id === el.closest('[data-item]').dataset.item);
     const f = el.dataset.field;
     item[f] = f === 'qty' ? int(el.value) : (f === 'name' || f === 'currency' || f === 'costType') ? el.value : num(el.value);
+    if (f === 'qty') syncTierTarget(tier, true);
     scheduleSave('item:' + item.id, () => sb.from('gift_tracker_items').upsert(itemDb(tier, item)));
   },
 
@@ -1376,6 +1370,7 @@ async function loadState(){
       id: i.id, name: i.name, currency: i.currency === 'JMD' ? 'JMD' : 'USD', costType: i.cost_type === 'writeoff' ? 'writeoff' : 'regular', cost: num(i.china_cost_usd), qty: i.qty
     }))
   }));
+  state.tiers.forEach(t => syncTierTarget(t, false));
   state.areas = areasRes.data.map(a => ({ id: a.id, name: a.name, manager: a.manager }));
   state.recipients = recipientsRes.data.map(r => ({
     id: r.id, areaId: r.area_id, customer: r.customer, salesRep: r.sales_rep,
