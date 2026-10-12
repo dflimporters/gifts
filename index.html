@@ -207,7 +207,7 @@
       <div class="logo-badge">DFL</div>
       <div>
         <h1>2026 Customer Gifting Tracker</h1>
-        <p>China-sourced tiered gifts &amp; local customer appreciation bags</p>
+        <p>Tiered gifts &amp; local customer appreciation bags</p>
       </div>
     </div>
     <div class="hero-actions">
@@ -241,7 +241,7 @@
       <div class="fx-bar">
         <label for="set-fx">USD → JMD</label>
         <input type="text" class="num-input" inputmode="decimal" autocomplete="off" id="set-fx" data-kind="fx" data-num="decimal">
-        <span>Landed = China cost × 1.5 × rate</span>
+        <span>Applies to lines priced in USD. Each line is a component of one gift.</span>
       </div>
     </div>
     <div id="tiers-container"></div>
@@ -264,7 +264,7 @@
     <div class="card">
       <p class="eyebrow">Bag Costing</p>
       <h2>What goes in each bag</h2>
-      <p class="subtitle">Cost per bag = unit cost × qty per bag. <span class="cost-legend">Stock write-off</span> rows are DFL stock given away — a product write-off at cost, not a cash purchase.</p>
+      <p class="subtitle">All items below make up ONE bag/gift: cost per bag = sum of (unit cost × qty per bag). <span class="cost-legend">Stock write-off</span> rows are DFL stock given away — a product write-off at cost, not a cash purchase.</p>
       <div class="table-wrap">
         <table>
           <thead>
@@ -333,14 +333,14 @@
     <div class="card">
       <p class="eyebrow">Overview</p>
       <h2>Gifts &amp; costs by class</h2>
-      <p class="subtitle">Tiers: order qty × landed cost for each item (Tiers &amp; Costing). Appreciation: target bags × cost per bag (Customer Appreciation → Bag Costing).</p>
+      <p class="subtitle">Tiers: gifts × cost per gift, all lines in a tier combined (Tiers &amp; Costing). Appreciation: target bags × cost per bag (Customer Appreciation → Bag Costing).</p>
       <div class="table-wrap" id="summary-table"></div>
     </div>
     <div class="summary-grid" id="summary-cards"></div>
     <div class="card">
       <p class="eyebrow">Breakdown</p>
-      <h2>Landed cost by tier (JMD)</h2>
-      <p class="subtitle">Order qty × landed cost per unit, from the Tiers &amp; Costing tab.</p>
+      <h2>Cost by tier (JMD)</h2>
+      <p class="subtitle">Gifts × cost per gift, from the Tiers &amp; Costing tab.</p>
       <div id="summary-bars"></div>
     </div>
     <div class="card">
@@ -362,7 +362,7 @@
    STATE
    ========================================================================= */
 let state = {
-  settings: { fx: 158 },
+  settings: { fx: 160 },
   tiers: [],
   areas: [],
   recipients: [],
@@ -371,8 +371,6 @@ let state = {
 
 const ui = { tab: 'tiers', area: null, filter: '' };
 const TABS = ['tiers', 'areas', 'appreciation', 'summary'];
-
-const MARKUP = 1.5; // baked-in China->landed markup, not user-editable
 
 function uid(){ return 'id_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
 
@@ -399,10 +397,10 @@ const bagItemById = id => state.appreciation.items.find(i => i.id === id);
 /* =========================================================================
    CALCS
    ========================================================================= */
-function landedUnit(item){ return num(item.chinaCostUSD) * MARKUP * num(state.settings.fx); }
-function tierGiftCost(tier){ return tier.items.reduce((s, i) => s + landedUnit(i), 0); }
-function tierUnitsOrdered(tier){ return tier.items.reduce((s, i) => s + int(i.qty), 0); }
-function tierOrderTotal(tier){ return tier.items.reduce((s, i) => s + landedUnit(i) * int(i.qty), 0); }
+// Every line in a tier is a component of ONE gift: cost per gift = sum of the lines.
+function itemJMD(item){ return item.currency === 'JMD' ? num(item.cost) : num(item.cost) * num(state.settings.fx); }
+function tierGiftCost(tier){ return tier.items.reduce((s, i) => s + itemJMD(i), 0); }
+function tierOrderTotal(tier){ return tierGiftCost(tier) * int(tier.targetQty); }
 function tierGoal(tier){ return tier.issueQty != null ? int(tier.issueQty) : int(tier.targetQty); }
 
 function recipientsIn(areaId){ return state.recipients.filter(r => r.areaId === areaId); }
@@ -459,13 +457,17 @@ function renderTierCard(tier){
   const rows = tier.items.length ? tier.items.map(item => `
       <tr data-item="${esc(item.id)}">
         <td class="col-name">${textInput('item', 'name', item.name, 'Item name')}</td>
-        <td>${numInput('item', 'chinaCostUSD', item.chinaCostUSD, 'decimal')}</td>
-        <td class="num-cell landed-cell" data-calc="landed"></td>
-        <td>${numInput('item', 'qty', item.qty, 'int')}</td>
-        <td class="num-cell line-total-cell" data-calc="line"></td>
+        <td>
+          <select data-kind="item" data-field="currency">
+            <option value="USD" ${item.currency !== 'JMD' ? 'selected' : ''}>USD</option>
+            <option value="JMD" ${item.currency === 'JMD' ? 'selected' : ''}>JMD</option>
+          </select>
+        </td>
+        <td>${numInput('item', 'cost', item.cost, 'decimal')}</td>
+        <td class="num-cell landed-cell" data-calc="jmd"></td>
         <td><button class="row-remove" data-action="remove-item" title="Remove item">&times;</button></td>
       </tr>`).join('')
-    : `<tr class="empty-row"><td colspan="6">No items yet — add one below.</td></tr>`;
+    : `<tr class="empty-row"><td colspan="5">No items yet — add one below.</td></tr>`;
 
   return `
     <div class="card" data-tier="${esc(tier.id)}">
@@ -499,10 +501,9 @@ function renderTierCard(tier){
           <thead>
             <tr>
               <th>Item</th>
-              <th class="num-cell">China Cost (USD)</th>
-              <th class="num-cell">Landed Cost/unit (JMD)</th>
-              <th class="num-cell">Order Qty</th>
-              <th class="num-cell">Line Total (JMD)</th>
+              <th>Currency</th>
+              <th class="num-cell">Cost</th>
+              <th class="num-cell">Cost (JMD)</th>
               <th></th>
             </tr>
           </thead>
@@ -548,9 +549,7 @@ function refreshTierCalcs(){
     card.querySelectorAll('tr[data-item]').forEach(tr => {
       const item = tier.items.find(i => i.id === tr.dataset.item);
       if (!item) return;
-      const landed = landedUnit(item);
-      tr.querySelector('[data-calc="landed"]').textContent = fmtJMD(landed);
-      tr.querySelector('[data-calc="line"]').textContent = fmtJMD(landed * int(item.qty));
+      tr.querySelector('[data-calc="jmd"]').textContent = fmtJMD(itemJMD(item));
     });
 
     const assigned = giftCount(state.recipients, tier.id);
@@ -564,17 +563,15 @@ function refreshTierCalcs(){
       ? `${fmtNum(int(tier.issueQty))} to issue + ${fmtNum(int(tier.extraQty))} extra = ${fmtNum(int(tier.targetQty))} target. “Left to assign” counts against the ${fmtNum(int(tier.issueQty))} to issue.`
       : '';
 
-    const ordered = tierUnitsOrdered(tier);
     card.querySelector('[data-calc="tier-footer"]').innerHTML = `
-      <div class="stat"><span class="num">${fmtNum(ordered)}</span><span class="lbl">Units Ordered (all items)</span></div>
-      <div class="stat"><span class="num">${fmtJMD(tierGiftCost(tier))}</span><span class="lbl">Cost per Gift (1 of each item)</span></div>
-      <div class="stat"><span class="num">${fmtJMD(tierOrderTotal(tier))}</span><span class="lbl">Est. Landed Total</span></div>`;
+      <div class="stat"><span class="num">${fmtJMD(tierGiftCost(tier))}</span><span class="lbl">Cost per Gift (all lines combined)</span></div>
+      <div class="stat"><span class="num">${fmtJMD(tierOrderTotal(tier))}</span><span class="lbl">Est. Total (${fmtNum(int(tier.targetQty))} gifts)</span></div>`;
   });
 }
 
 function addItem(tierId){
   const tier = tierById(tierId);
-  const item = { id: uid(), name: '', chinaCostUSD: 0, qty: int(tier.targetQty) };
+  const item = { id: uid(), name: '', currency: 'USD', cost: 0, qty: int(tier.targetQty) };
   tier.items.push(item);
   renderTiers();
   refreshComputed();
@@ -916,7 +913,6 @@ function bars(rows, colorFor){
 }
 
 function renderSummary(){
-  const orderedQty = state.tiers.reduce((s, t) => s + tierUnitsOrdered(t), 0);
   const orderTotal = state.tiers.reduce((s, t) => s + tierOrderTotal(t), 0);
   const assigned = state.tiers.reduce((s, t) => s + giftCount(state.recipients, t.id), 0);
   const goal = state.tiers.reduce((s, t) => s + tierGoal(t), 0);
@@ -970,14 +966,14 @@ function renderSummary(){
 
   document.getElementById('summary-cards').innerHTML = `
     <div class="summary-card">
-      <p class="eyebrow">Tiered Gifts Ordered</p>
-      <div class="big">${fmtNum(orderedQty)}</div>
-      <div class="sub">item units across ${esc(state.tiers.map(t => t.name).join(' / '))}</div>
+      <p class="eyebrow">Tiered Gifts</p>
+      <div class="big">${fmtNum(targetAll)}</div>
+      <div class="sub">gifts across ${esc(state.tiers.map(t => t.name).join(' / '))}</div>
     </div>
     <div class="summary-card">
-      <p class="eyebrow">Est. Landed Budget</p>
+      <p class="eyebrow">Est. Tiered Budget</p>
       <div class="big">${fmtJMD(orderTotal)}</div>
-      <div class="sub">tiered gifts only, China → Jamaica</div>
+      <div class="sub">tiered gifts only</div>
     </div>
     <div class="summary-card">
       <p class="eyebrow">Assigned to Customers</p>
@@ -1055,7 +1051,7 @@ const inputHandlers = {
     const tier = tierById(el.closest('[data-tier]').dataset.tier);
     const item = tier.items.find(i => i.id === el.closest('[data-item]').dataset.item);
     const f = el.dataset.field;
-    item[f] = f === 'name' ? el.value : f === 'qty' ? int(el.value) : num(el.value);
+    item[f] = (f === 'name' || f === 'currency') ? el.value : num(el.value);
     scheduleSave('item:' + item.id, () => sb.from('gift_tracker_items').upsert(itemDb(tier, item)));
   },
 
@@ -1180,14 +1176,15 @@ function exportJSON(){
 function normalizeState(p){
   if (!p || !Array.isArray(p.tiers)) throw new Error('Not a tracker backup (no tiers)');
   const out = {
-    settings: { fx: num(p.settings?.fx) || 158 },
+    settings: { fx: num(p.settings?.fx) || 160 },
     tiers: p.tiers.map(t => ({
       id: String(t.id), name: String(t.name || t.id), pillClass: String(t.pillClass || ''),
       targetQty: int(t.targetQty),
       issueQty: t.issueQty == null ? null : int(t.issueQty),
       extraQty: t.extraQty == null ? null : int(t.extraQty),
       items: (t.items || []).map(i => ({
-        id: String(i.id || uid()), name: String(i.name || ''), chinaCostUSD: num(i.chinaCostUSD), qty: int(i.qty)
+        id: String(i.id || uid()), name: String(i.name || ''), currency: i.currency === 'JMD' ? 'JMD' : 'USD',
+        cost: num(i.cost ?? i.chinaCostUSD), qty: int(i.qty)
       }))
     })),
     // Older backups have no areas/customers — keep what's already here in that case.
@@ -1261,7 +1258,7 @@ let loadFailed = false; // never write defaults over data we couldn't read
 
 const itemDb = (tier, item) => ({
   id: item.id, tier_id: tier.id, name: item.name,
-  china_cost_usd: num(item.chinaCostUSD), qty: int(item.qty), sort_order: Math.max(0, tier.items.indexOf(item))
+  china_cost_usd: num(item.cost), currency: item.currency === 'JMD' ? 'JMD' : 'USD', qty: int(item.qty), sort_order: Math.max(0, tier.items.indexOf(item))
 });
 const recipientDb = r => ({
   id: r.id, area_id: r.areaId, customer: r.customer, sales_rep: r.salesRep,
@@ -1361,12 +1358,12 @@ async function loadState(){
   if (firstError) throw firstError;
   if (!tiersRes.data.length || !settingsRes.data) throw new Error('Database returned no tracker data');
 
-  state.settings.fx = num(settingsRes.data?.fx) || 158;
+  state.settings.fx = num(settingsRes.data?.fx) || 160;
   state.tiers = tiersRes.data.map(t => ({
     id: t.id, name: t.name, pillClass: t.pill_class,
     targetQty: t.target_qty, issueQty: t.issue_qty, extraQty: t.extra_qty,
     items: itemsRes.data.filter(i => i.tier_id === t.id).map(i => ({
-      id: i.id, name: i.name, chinaCostUSD: num(i.china_cost_usd), qty: i.qty
+      id: i.id, name: i.name, currency: i.currency === 'JMD' ? 'JMD' : 'USD', cost: num(i.china_cost_usd), qty: i.qty
     }))
   }));
   state.areas = areasRes.data.map(a => ({ id: a.id, name: a.name, manager: a.manager }));
